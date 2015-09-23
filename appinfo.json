@@ -1,0 +1,778 @@
+{
+    "appKeys": {
+        "KEY_ANIMATION": 0,
+        "KEY_BADTEAM": 4,
+        "KEY_COUNTDOWN": 7,
+        "KEY_COUNTDOWNANI": 9,
+        "KEY_COUNTDOWNDEFAULT": 8,
+        "KEY_DELAY": 12,
+        "KEY_DISCONNECT": 1,
+        "KEY_GAMEDAY": 10,
+        "KEY_GAMETIME": 11,
+        "KEY_RECONNECT": 2,
+        "KEY_TEAM": 3,
+        "KEY_VERSION": 6,
+        "KEY_WINDOW": 5
+    },
+    "capabilities": [
+        "configurable"
+    ],
+    "companyName": "kenny.linderman@gmail.com",
+    "longName": "NCAA FBS Watchface",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/ohiost.png",
+                "name": "ohiost",
+                "type": "png"
+            },
+            {
+                "file": "images/meteor.png",
+                "name": "meteor",
+                "type": "png"
+            },
+            {
+                "file": "images/uva.png",
+                "name": "uva",
+                "type": "png"
+            },
+            {
+                "file": "images/kstate.png",
+                "name": "kstate",
+                "type": "png"
+            },
+            {
+                "file": "images/NCAAIcon.png",
+                "menuIcon": true,
+                "name": "icon",
+                "type": "png"
+            },
+            {
+                "file": "images/arkansasst.png",
+                "name": "arkansasst",
+                "type": "png"
+            },
+            {
+                "file": "images/arkansas.png",
+                "name": "arkansas",
+                "type": "png"
+            },
+            {
+                "file": "images/update.png",
+                "name": "update",
+                "type": "png"
+            },
+            {
+                "file": "images/chaos.png",
+                "name": "chaos",
+                "type": "png"
+            },
+            {
+                "file": "images/sunbelt.png",
+                "name": "sunbelt",
+                "type": "png"
+            },
+            {
+                "file": "images/sec.png",
+                "name": "sec",
+                "type": "png"
+            },
+            {
+                "file": "images/pac12.png",
+                "name": "pac12",
+                "type": "png"
+            },
+            {
+                "file": "images/mw.png",
+                "name": "mw",
+                "type": "png"
+            },
+            {
+                "file": "images/mac.png",
+                "name": "mac",
+                "type": "png"
+            },
+            {
+                "file": "images/cusa.png",
+                "name": "cusa",
+                "type": "png"
+            },
+            {
+                "file": "images/big12.png",
+                "name": "big12",
+                "type": "png"
+            },
+            {
+                "file": "images/big10.png",
+                "name": "big10",
+                "type": "png"
+            },
+            {
+                "file": "images/acc.png",
+                "name": "acc",
+                "type": "png"
+            },
+            {
+                "file": "images/aac.png",
+                "name": "aac",
+                "type": "png"
+            },
+            {
+                "file": "images/playoff.png",
+                "name": "playoff",
+                "type": "png"
+            },
+            {
+                "file": "images/ncaa.png",
+                "name": "ncaa",
+                "type": "png"
+            },
+            {
+                "file": "images/wyoming.png",
+                "name": "wyoming",
+                "type": "png"
+            },
+            {
+                "file": "images/washington.png",
+                "name": "washington",
+                "type": "png"
+            },
+            {
+                "file": "images/uab.png",
+                "name": "uab",
+                "type": "png"
+            },
+            {
+                "file": "images/wvu.png",
+                "name": "wvu",
+                "type": "png"
+            },
+            {
+                "file": "images/wku.png",
+                "name": "wku",
+                "type": "png"
+            },
+            {
+                "file": "images/wisconsin.png",
+                "name": "wisconsin",
+                "type": "png"
+            },
+            {
+                "file": "images/westernmichigan.png",
+                "name": "westernmichigan",
+                "type": "png"
+            },
+            {
+                "file": "images/washingtonst.png",
+                "name": "washingtonst",
+                "type": "png"
+            },
+            {
+                "file": "images/wake.png",
+                "name": "wake",
+                "type": "png"
+            },
+            {
+                "file": "images/vt.png",
+                "name": "vt",
+                "type": "png"
+            },
+            {
+                "file": "images/vandy.png",
+                "name": "vandy",
+                "type": "png"
+            },
+            {
+                "file": "images/utep.png",
+                "name": "utep",
+                "type": "png"
+            },
+            {
+                "file": "images/utahst.png",
+                "name": "utahst",
+                "type": "png"
+            },
+            {
+                "file": "images/utah.png",
+                "name": "utah",
+                "type": "png"
+            },
+            {
+                "file": "images/unlv.png",
+                "name": "unlv",
+                "type": "png"
+            },
+            {
+                "file": "images/uncc.png",
+                "name": "uncc",
+                "type": "png"
+            },
+            {
+                "file": "images/ucla.png",
+                "name": "ucla",
+                "type": "png"
+            },
+            {
+                "file": "images/tulsa.png",
+                "name": "tulsa",
+                "type": "png"
+            },
+            {
+                "file": "images/tulane.png",
+                "name": "tulane",
+                "type": "png"
+            },
+            {
+                "file": "images/troy.png",
+                "name": "troy",
+                "type": "png"
+            },
+            {
+                "file": "images/toledo.png",
+                "name": "toledo",
+                "type": "png"
+            },
+            {
+                "file": "images/utsa.png",
+                "name": "utsa",
+                "type": "png"
+            },
+            {
+                "file": "images/texastech.png",
+                "name": "texastech",
+                "type": "png"
+            },
+            {
+                "file": "images/texasst.png",
+                "name": "texasst",
+                "type": "png"
+            },
+            {
+                "file": "images/tamu.png",
+                "name": "tamu",
+                "type": "png"
+            },
+            {
+                "file": "images/texas.png",
+                "name": "texas",
+                "type": "png"
+            },
+            {
+                "file": "images/tennessee.png",
+                "name": "tennessee",
+                "type": "png"
+            },
+            {
+                "file": "images/temple.png",
+                "name": "temple",
+                "type": "png"
+            },
+            {
+                "file": "images/tcu.png",
+                "name": "tcu",
+                "type": "png"
+            },
+            {
+                "file": "images/syracuse.png",
+                "name": "syracuse",
+                "type": "png"
+            },
+            {
+                "file": "images/stanford.png",
+                "name": "stanford",
+                "type": "png"
+            },
+            {
+                "file": "images/southernmiss.png",
+                "name": "southernmiss",
+                "type": "png"
+            },
+            {
+                "file": "images/southerncal.png",
+                "name": "southerncal",
+                "type": "png"
+            },
+            {
+                "file": "images/usf.png",
+                "name": "usf",
+                "type": "png"
+            },
+            {
+                "file": "images/southalabama.png",
+                "name": "southalabama",
+                "type": "png"
+            },
+            {
+                "file": "images/smu.png",
+                "name": "smu",
+                "type": "png"
+            },
+            {
+                "file": "images/sanjosest.png",
+                "name": "sanjosest",
+                "type": "png"
+            },
+            {
+                "file": "images/sandiegost.png",
+                "name": "sandiegost",
+                "type": "png"
+            },
+            {
+                "file": "images/rutgers.png",
+                "name": "rutgers",
+                "type": "png"
+            },
+            {
+                "file": "images/rice.png",
+                "name": "rice",
+                "type": "png"
+            },
+            {
+                "file": "images/purdue.png",
+                "name": "purdue",
+                "type": "png"
+            },
+            {
+                "file": "images/pitt.png",
+                "name": "pitt",
+                "type": "png"
+            },
+            {
+                "file": "images/pennst.png",
+                "name": "pennst",
+                "type": "png"
+            },
+            {
+                "file": "images/oregonst.png",
+                "name": "oregonst",
+                "type": "png"
+            },
+            {
+                "file": "images/oregon.png",
+                "name": "oregon",
+                "type": "png"
+            },
+            {
+                "file": "images/odu.png",
+                "name": "odu",
+                "type": "png"
+            },
+            {
+                "file": "images/oklahomast.png",
+                "name": "oklahomast",
+                "type": "png"
+            },
+            {
+                "file": "images/oklahoma.png",
+                "name": "oklahoma",
+                "type": "png"
+            },
+            {
+                "file": "images/ohio.png",
+                "name": "ohio",
+                "type": "png"
+            },
+            {
+                "file": "images/notredame.png",
+                "name": "notredame",
+                "type": "png"
+            },
+            {
+                "file": "images/northwestern.png",
+                "name": "northwestern",
+                "type": "png"
+            },
+            {
+                "file": "images/niu.png",
+                "name": "niu",
+                "type": "png"
+            },
+            {
+                "file": "images/northtexas.png",
+                "name": "northtexas",
+                "type": "png"
+            },
+            {
+                "file": "images/ncstate.png",
+                "name": "ncstate",
+                "type": "png"
+            },
+            {
+                "file": "images/unc.png",
+                "name": "unc",
+                "type": "png"
+            },
+            {
+                "file": "images/newmexicost.png",
+                "name": "newmexicost",
+                "type": "png"
+            },
+            {
+                "file": "images/newmexico.png",
+                "name": "newmexico",
+                "type": "png"
+            },
+            {
+                "file": "images/nevada.png",
+                "name": "nevada",
+                "type": "png"
+            },
+            {
+                "file": "images/nebraska.png",
+                "name": "nebraska",
+                "type": "png"
+            },
+            {
+                "file": "images/navy.png",
+                "name": "navy",
+                "type": "png"
+            },
+            {
+                "file": "images/missouri.png",
+                "name": "missouri",
+                "type": "png"
+            },
+            {
+                "file": "images/missst.png",
+                "name": "missst",
+                "type": "png"
+            },
+            {
+                "file": "images/olemiss.png",
+                "name": "olemiss",
+                "type": "png"
+            },
+            {
+                "file": "images/minnesota.png",
+                "name": "minnesota",
+                "type": "png"
+            },
+            {
+                "file": "images/midtennst.png",
+                "name": "midtennst",
+                "type": "png"
+            },
+            {
+                "file": "images/michiganst.png",
+                "name": "michiganst",
+                "type": "png"
+            },
+            {
+                "file": "images/michigan.png",
+                "name": "michigan",
+                "type": "png"
+            },
+            {
+                "file": "images/miamioh.png",
+                "name": "miamioh",
+                "type": "png"
+            },
+            {
+                "file": "images/miami.png",
+                "name": "miami",
+                "type": "png"
+            },
+            {
+                "file": "images/memphis.png",
+                "name": "memphis",
+                "type": "png"
+            },
+            {
+                "file": "images/umass.png",
+                "name": "umass",
+                "type": "png"
+            },
+            {
+                "file": "images/maryland.png",
+                "name": "maryland",
+                "type": "png"
+            },
+            {
+                "file": "images/marshall.png",
+                "name": "marshall",
+                "type": "png"
+            },
+            {
+                "file": "images/lsu.png",
+                "name": "lsu",
+                "type": "png"
+            },
+            {
+                "file": "images/louisville.png",
+                "name": "louisville",
+                "type": "png"
+            },
+            {
+                "file": "images/ulm.png",
+                "name": "ulm",
+                "type": "png"
+            },
+            {
+                "file": "images/ull.png",
+                "name": "ull",
+                "type": "png"
+            },
+            {
+                "file": "images/louisianatech.png",
+                "name": "louisianatech",
+                "type": "png"
+            },
+            {
+                "file": "images/kentucky.png",
+                "name": "kentucky",
+                "type": "png"
+            },
+            {
+                "file": "images/kentst.png",
+                "name": "kentst",
+                "type": "png"
+            },
+            {
+                "file": "images/kansas.png",
+                "name": "kansas",
+                "type": "png"
+            },
+            {
+                "file": "images/iowast.png",
+                "name": "iowast",
+                "type": "png"
+            },
+            {
+                "file": "images/iowa.png",
+                "name": "iowa",
+                "type": "png"
+            },
+            {
+                "file": "images/indiana.png",
+                "name": "indiana",
+                "type": "png"
+            },
+            {
+                "file": "images/illinois.png",
+                "name": "illinois",
+                "type": "png"
+            },
+            {
+                "file": "images/idaho.png",
+                "name": "idaho",
+                "type": "png"
+            },
+            {
+                "file": "images/houston.png",
+                "name": "houston",
+                "type": "png"
+            },
+            {
+                "file": "images/hawaii.png",
+                "name": "hawaii",
+                "type": "png"
+            },
+            {
+                "file": "images/gt.PNG",
+                "name": "gt",
+                "type": "png"
+            },
+            {
+                "file": "images/georgiast.png",
+                "name": "georgiast",
+                "type": "png"
+            },
+            {
+                "file": "images/gsu.png",
+                "name": "gsu",
+                "type": "png"
+            },
+            {
+                "file": "images/uga.png",
+                "name": "uga",
+                "type": "png"
+            },
+            {
+                "file": "images/fresnost.png",
+                "name": "fresnost",
+                "type": "png"
+            },
+            {
+                "file": "images/fsu.png",
+                "name": "fsu",
+                "type": "png"
+            },
+            {
+                "file": "images/fiu.png",
+                "name": "fiu",
+                "type": "png"
+            },
+            {
+                "file": "images/fau.png",
+                "name": "fau",
+                "type": "png"
+            },
+            {
+                "file": "images/florida.png",
+                "name": "florida",
+                "type": "png"
+            },
+            {
+                "file": "images/easternmichigan.png",
+                "name": "easternmichigan",
+                "type": "png"
+            },
+            {
+                "file": "images/ecu.png",
+                "name": "ecu",
+                "type": "png"
+            },
+            {
+                "file": "images/duke.png",
+                "name": "duke",
+                "type": "png"
+            },
+            {
+                "file": "images/uconn.png",
+                "name": "uconn",
+                "type": "png"
+            },
+            {
+                "file": "images/coloradost.png",
+                "name": "coloradost",
+                "type": "png"
+            },
+            {
+                "file": "images/colorado.png",
+                "name": "colorado",
+                "type": "png"
+            },
+            {
+                "file": "images/clemson.png",
+                "name": "clemson",
+                "type": "png"
+            },
+            {
+                "file": "images/cincinnati.png",
+                "name": "cincinnati",
+                "type": "png"
+            },
+            {
+                "file": "images/centralmichigan.png",
+                "name": "centralmichigan",
+                "type": "png"
+            },
+            {
+                "file": "images/ucf.png",
+                "name": "ucf",
+                "type": "png"
+            },
+            {
+                "file": "images/cal.png",
+                "name": "cal",
+                "type": "png"
+            },
+            {
+                "file": "images/buffalo.png",
+                "name": "buffalo",
+                "type": "png"
+            },
+            {
+                "file": "images/byu.png",
+                "name": "byu",
+                "type": "png"
+            },
+            {
+                "file": "images/bowlinggreen.png",
+                "name": "bowlinggreen",
+                "type": "png"
+            },
+            {
+                "file": "images/bostoncollege.png",
+                "name": "bostoncollege",
+                "type": "png"
+            },
+            {
+                "file": "images/boisest.png",
+                "name": "boisest",
+                "type": "png"
+            },
+            {
+                "file": "images/baylor.png",
+                "name": "baylor",
+                "type": "png"
+            },
+            {
+                "file": "images/ballst.png",
+                "name": "ballst",
+                "type": "png"
+            },
+            {
+                "file": "images/auburn.png",
+                "name": "auburn",
+                "type": "png"
+            },
+            {
+                "file": "images/army.png",
+                "name": "army",
+                "type": "png"
+            },
+            {
+                "file": "images/arizonast.png",
+                "name": "arizonast",
+                "type": "png"
+            },
+            {
+                "file": "images/arizona.png",
+                "name": "arizona",
+                "type": "png"
+            },
+            {
+                "file": "images/appst.png",
+                "name": "appst",
+                "type": "png"
+            },
+            {
+                "file": "images/alabama.png",
+                "name": "alabama",
+                "type": "png"
+            },
+            {
+                "file": "images/akron.png",
+                "name": "akron",
+                "type": "png"
+            },
+            {
+                "file": "images/airforce.png",
+                "name": "airforce",
+                "type": "png"
+            },
+            {
+                "file": "images/bt.png",
+                "name": "bt",
+                "type": "png"
+            },
+            {
+                "file": "images/batCharge.png",
+                "name": "batCharge",
+                "type": "png"
+            },
+            {
+                "file": "images/bat.png",
+                "name": "bat",
+                "type": "png"
+            },
+            {
+                "file": "images/gamecock.png",
+                "name": "gamecock",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "NCAA FBS",
+    "targetPlatforms": [
+        "basalt"
+    ],
+    "uuid": "0290cf07-cc80-4d74-9467-1dde369f7350",
+    "versionLabel": "2.00",
+    "watchapp": {
+        "watchface": true
+    }
+}
