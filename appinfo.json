@@ -7,8 +7,12 @@
         "KEY_COUNTDOWNDEFAULT": 8,
         "KEY_DELAY": 12,
         "KEY_DISCONNECT": 1,
+        "KEY_GAMEAPM": 15,
         "KEY_GAMEDAY": 10,
+        "KEY_GAMEMIN": 13,
+        "KEY_GAMEMONTH": 14,
         "KEY_GAMETIME": 11,
+        "KEY_GAMEYEAR": 16,
         "KEY_RECONNECT": 2,
         "KEY_TEAM": 3,
         "KEY_VERSION": 6,
@@ -22,6 +26,11 @@
     "projectType": "native",
     "resources": {
         "media": [
+            {
+                "file": "images/illinois.png",
+                "name": "illinois",
+                "type": "png"
+            },
             {
                 "file": "images/ohiost.png",
                 "name": "ohiost",
@@ -546,11 +555,6 @@
             {
                 "file": "images/indiana.png",
                 "name": "indiana",
-                "type": "png"
-            },
-            {
-                "file": "images/illinois.png",
-                "name": "illinois",
                 "type": "png"
             },
             {

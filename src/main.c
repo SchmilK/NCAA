@@ -7,10 +7,11 @@ static BitmapLayer *logo, *bt, *bat, *beatteam;
 static GBitmap *s_res_logo, *s_res_clear, *s_res_bt, *s_res_bat, *s_res_batCharge, *s_res_badteam, *s_res_update;
 static TextLayer *s_time_layer, *s_date_layer, *s_date2_layer, *s_beat_layer, *s_count1_layer, *s_count2_layer;
 int recon = 1, discon = 3, count = 0, runAnimation = 1, mainWindow = 0, secondsTime = 0, countdown = 0,
-		countdownDEFAULT = 1, countdownAni = 1, random = 0, randTeam, gameday, daysince, delay = 1;
+		countdownDEFAULT = 1, countdownAni = 1, random = 0, randombad = 0, randTeam, randTeamBad, gameday, daysince, 
+		daysince2, delay = 1, gametime, gamemin, gamemonth, gameapm, gameyear;
 int team = 0;
-int badteam = 20;
-int version = 2;
+int badteam = 143;//20;
+int version = 250;
 bool btHistory = true, firstTime = true, outdated = false, animationsRunning = false, timeup;
 static int s_toggle, s_toggle2, s_toggle3;
 
@@ -194,10 +195,16 @@ static void update_time() {
 	if(countdown == 1){
 		int wday = tick_time->tm_wday;
 		int min = tick_time->tm_min;
+		int day = tick_time->tm_mday;
+		int month = tick_time->tm_mon;
+		month = month + 1;
 		int daylight = tick_time->tm_isdst;
+		int dayyear = tick_time->tm_yday;
+		int year = tick_time->tm_year;
+		year = year + 1900;
 		int hour;
-		int countDay, countHour, countMin;
-		
+		int countDay, countHour, countMin, countMonth;
+
 		if(wday != 6){
 			timeup = false;
 		}
@@ -214,7 +221,7 @@ static void update_time() {
 			else{
 				hour = ptm->tm_hour+EDT;
 			}
-			
+
 			if(hour < 0){
 				hour = 24 + hour;
 			}
@@ -230,53 +237,138 @@ static void update_time() {
 				countHour = 11 - hour;
 			}
 			countMin = 60 - min;
-			
+
 			countHour = (countDay * 24) + countHour;
+
+		}
+		else{
+			hour = tick_time->tm_hour;
 			
-			if(countHour > 99 && !timeup){
-				countDay = countHour / 24;
-				countHour = countHour % 24 + 1;
-				if(countDay < 10 && countHour < 10){
-					snprintf(buffer1, sizeof("00:00"), "0%d:0%d", countDay, countHour);
-				}
-				else if(countDay < 10){
-					snprintf(buffer1, sizeof("00:00"), "0%d:%d", countDay, countHour);
-				}
-				else if(countHour < 10){
-					snprintf(buffer1, sizeof("00:00"), "%d:0%d", countDay, countHour);
-				}
-				else{
-					snprintf(buffer1, sizeof("00:00"), "%d:%d", countDay, countHour);
-				}
-				text_layer_set_text(s_count1_layer, "Days");
-				text_layer_set_text(s_count2_layer, "Hours");
+			if(gameapm == 1 && gametime != 12){
+				gametime = gametime + 12;
+				gameapm = 0;
 			}
-			else if(!timeup){
-				if(countHour < 10 && countMin < 10){
-					snprintf(buffer1, sizeof("00:00"), "0%d:0%d", countHour, countMin);
+			if(gameapm == 0 && gametime == 12){
+				gametime = 0;
+			}
+			
+			if(hour < 0){
+				hour = 24 + hour;
+			}
+
+			countMonth = gamemonth - month;
+			
+			if(countMonth != 0){
+				countDay = ((gamemonth-1) * 30);
+				if(gamemonth > 1){
+					countDay++;
 				}
-				else if(countHour < 10){
-					snprintf(buffer1, sizeof("00:00"), "0%d:%d", countHour, countMin);
+				if(gamemonth > 2){
+					countDay = countDay - 2;
 				}
-				else if(countMin < 10){
-					snprintf(buffer1, sizeof("00:00"), "%d:0%d", countHour, countMin);
+				if(gamemonth > 3){
+					countDay++;
 				}
-				else{
-					snprintf(buffer1, sizeof("00:00"), "%d:%d", countHour, countMin);
+				if(gamemonth > 5){
+					countDay++;
 				}
-				text_layer_set_text(s_count1_layer, "Hours");
-				text_layer_set_text(s_count2_layer, "Mins");
+				if(gamemonth > 7){
+					countDay++;
+				}
+				if(gamemonth > 8){
+					countDay++;
+				}
+				if(gamemonth > 10){
+					countDay++;
+				}
 				
-				if(countHour == 0 && countMin == 0){
-					timeup = true;
+				countDay = countDay + gameday;
+
+				if(gameyear - year != 0){
+					countDay = countDay + (365 * (gameyear - year));
+				}
+				countDay = countDay - dayyear - 1;
+
+			}
+			else{
+				if(gameyear - year != 0){
+					countDay = (365 * (gameyear - year)) + (gameday - day);
+				}
+				else{
+					countDay = gameday - day;
 				}
 			}
-			
-			if(timeup){
-				snprintf(buffer1, sizeof("00:00"), "00:00");
-				text_layer_set_text(s_count1_layer, "Hours");
-				text_layer_set_text(s_count2_layer, "Mins");
+
+			//countDay = countDay + (gameday - day);
+
+			if(hour > gametime){
+				countHour = hour - (gametime - 1);
+				countDay--;
+				countHour = 24 - countHour;
 			}
+			else{
+				countHour = (gametime) - hour;
+			}
+
+			countHour = (countDay * 24) + countHour;
+
+			if(min > gamemin){
+				countMin = (60 - min) + gamemin;
+				countHour--;
+			}
+			else{
+				countMin = gamemin - min;
+			}
+		}	
+
+		if(countDay > 99 && !timeup){
+			snprintf(buffer1, sizeof("00:00"), "99:99");
+			text_layer_set_text(s_count1_layer, "Days");
+			text_layer_set_text(s_count2_layer, "Hours");
+		}
+		else if(countHour > 99 && !timeup){
+			countDay = countHour / 24;
+			countHour = countHour % 24 + 1;
+			if(countDay < 10 && countHour < 10){
+				snprintf(buffer1, sizeof("00:00"), "0%d:0%d", countDay, countHour);
+			}
+			else if(countDay < 10){
+				snprintf(buffer1, sizeof("00:00"), "0%d:%d", countDay, countHour);
+			}
+			else if(countHour < 10){
+				snprintf(buffer1, sizeof("00:00"), "%d:0%d", countDay, countHour);
+			}
+			else{
+				snprintf(buffer1, sizeof("00:00"), "%d:%d", countDay, countHour);
+			}
+			text_layer_set_text(s_count1_layer, "Days");
+			text_layer_set_text(s_count2_layer, "Hours");
+		}
+		else if(!timeup){
+			if(countHour < 10 && countMin < 10){
+				snprintf(buffer1, sizeof("00:00"), "0%d:0%d", countHour, countMin);
+			}
+			else if(countHour < 10){
+				snprintf(buffer1, sizeof("00:00"), "0%d:%d", countHour, countMin);
+			}
+			else if(countMin < 10){
+				snprintf(buffer1, sizeof("00:00"), "%d:0%d", countHour, countMin);
+			}
+			else{
+				snprintf(buffer1, sizeof("00:00"), "%d:%d", countHour, countMin);
+			}
+			text_layer_set_text(s_count1_layer, "Hours");
+			text_layer_set_text(s_count2_layer, "Mins");
+
+			if((countHour == 0 && countMin == 0) || countHour < 0){
+				timeup = true;
+			}
+		}
+
+		if(timeup){
+			snprintf(buffer1, sizeof("00:00"), "00:00");
+			text_layer_set_text(s_count1_layer, "Hours");
+			text_layer_set_text(s_count2_layer, "Mins");
 		}
 	}
 	else{
@@ -304,25 +396,25 @@ static void update_time() {
 	}
 	strftime(buffer2, sizeof("Jan"), "%b", tick_time);
 	strftime(buffer3, sizeof("00"), "%e", tick_time);
-	
+
 	//Set the time text
 	text_layer_set_text(s_time_layer, buffer1);
 	text_layer_set_text(s_date_layer, buffer2);
 	text_layer_set_text(s_date2_layer, buffer3);
-	
+
 }
 
 //Handle when it physically chages minutes
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	// Show current time
 	update_time();
-	
+
 	// Get the current battery level
 	battery_handler(battery_state_service_peek());
-	
+
 	// Show current bluetooth connection state
-  bt_handler(bluetooth_connection_service_peek());
-	
+	bt_handler(bluetooth_connection_service_peek());
+
 	if(firstTime && runAnimation == 1){
 		layer_set_update_proc(s_badteambox_layer, layer_update_proc3);
 		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
@@ -337,9 +429,8 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 //Animation handler for the boomerang
 static void anim_stopped_handler(Animation *animation, bool finished, void *context) {
-  // Schedule the next one, unless the app is exiting
-  if (finished) {
-		//If this is the first time, run it again so that it returns
+	// Schedule the next one, unless the app is exiting
+	if (finished) {
 		if(count == 0){
 			count++;
 			if(delay == 1){
@@ -348,9 +439,8 @@ static void anim_stopped_handler(Animation *animation, bool finished, void *cont
 			else{
 				psleep(1200);
 			}
-    	beat_animation();
+			beat_animation();
 		}
-		//When that is done, change the bad guy (cause he's dead)
 		else{
 			count = 0;
 			if(countdownAni == 1){
@@ -364,7 +454,7 @@ static void anim_stopped_handler(Animation *animation, bool finished, void *cont
 				update_time();
 			}
 		}
-  }
+	}
 }
 
 //Beat animation
@@ -381,48 +471,48 @@ static void beat_animation() {
 	}
 
 	//We are actually using the movement of the layer
-  Layer *layer = text_layer_get_layer(s_beat_layer);
+	Layer *layer = text_layer_get_layer(s_beat_layer);
 	Layer *layer2 = s_beatbox_layer;
 	Layer *layer3 = s_badteambox_layer;
 	Layer *layer4 = bitmap_layer_get_layer(beatteam);
-	
+
 	//And move the created text from one spot to the other
 	GRect to_rect2 = (s_toggle2) ? GRect(-200, 0, 200, 144) : GRect(0, 0, 200, 144);
-  s_toggle2 = !s_toggle2;
-  destroy_property_animation(&s_badteambox_animation);
-  s_badteambox_animation = property_animation_create_layer_frame(layer3, NULL, &to_rect2);
-  animation_set_duration((Animation*) s_badteambox_animation, 600);
-  animation_set_curve((Animation*) s_badteambox_animation, AnimationCurveEaseOut);
-  animation_set_curve((Animation*) s_badteambox_animation, AnimationCurveEaseIn);
-  animation_schedule((Animation*) s_badteambox_animation);
-	
-  GRect to_rect3 = (s_toggle3) ? GRect(-115, 3, 115, 115) : GRect(25, 3, 115, 115);
-  s_toggle3 = !s_toggle3;
+	s_toggle2 = !s_toggle2;
+	destroy_property_animation(&s_badteambox_animation);
+	s_badteambox_animation = property_animation_create_layer_frame(layer3, NULL, &to_rect2);
+	animation_set_duration((Animation*) s_badteambox_animation, 600);
+	animation_set_curve((Animation*) s_badteambox_animation, AnimationCurveEaseOut);
+	animation_set_curve((Animation*) s_badteambox_animation, AnimationCurveEaseIn);
+	animation_schedule((Animation*) s_badteambox_animation);
+
+	GRect to_rect3 = (s_toggle3) ? GRect(-115, 3, 115, 115) : GRect(25, 3, 115, 115);
+	s_toggle3 = !s_toggle3;
 	destroy_property_animation(&s_badteam_animation);
 	s_badteam_animation = property_animation_create_layer_frame(layer4, NULL, &to_rect3);
 	animation_set_duration((Animation*) s_badteam_animation, 600);
 	animation_set_curve((Animation*) s_badteam_animation, AnimationCurveEaseOut);
-  animation_set_curve((Animation*) s_badteam_animation, AnimationCurveEaseIn);
-  animation_schedule((Animation*) s_badteam_animation);
-	
-  GRect to_rect = (s_toggle) ? GRect(0, -40, 55, 40) : GRect(0, 0, 55, 40);
-  s_toggle = !s_toggle;
+	animation_set_curve((Animation*) s_badteam_animation, AnimationCurveEaseIn);
+	animation_schedule((Animation*) s_badteam_animation);
+
+	GRect to_rect = (s_toggle) ? GRect(0, -40, 55, 40) : GRect(0, 0, 55, 40);
+	s_toggle = !s_toggle;
 	destroy_property_animation(&s_beat_animation);
-  s_beat_animation = property_animation_create_layer_frame(layer, NULL, &to_rect);
-  animation_set_duration((Animation*) s_beat_animation, 600);
-  animation_set_curve((Animation*) s_beat_animation, AnimationCurveEaseOut);
-  animation_set_curve((Animation*) s_beat_animation, AnimationCurveEaseIn);
-  animation_schedule((Animation*) s_beat_animation);
-	
+	s_beat_animation = property_animation_create_layer_frame(layer, NULL, &to_rect);
+	animation_set_duration((Animation*) s_beat_animation, 600);
+	animation_set_curve((Animation*) s_beat_animation, AnimationCurveEaseOut);
+	animation_set_curve((Animation*) s_beat_animation, AnimationCurveEaseIn);
+	animation_schedule((Animation*) s_beat_animation);
+
 	destroy_property_animation(&s_beatbox_animation);
-  s_beatbox_animation = property_animation_create_layer_frame(layer2, NULL, &to_rect);
-  animation_set_duration((Animation*) s_beatbox_animation, 600);
-  animation_set_curve((Animation*) s_beatbox_animation, AnimationCurveEaseOut);
-  animation_set_curve((Animation*) s_beatbox_animation, AnimationCurveEaseIn);
+	s_beatbox_animation = property_animation_create_layer_frame(layer2, NULL, &to_rect);
+	animation_set_duration((Animation*) s_beatbox_animation, 600);
+	animation_set_curve((Animation*) s_beatbox_animation, AnimationCurveEaseOut);
+	animation_set_curve((Animation*) s_beatbox_animation, AnimationCurveEaseIn);
 	animation_set_handlers((Animation*)s_beatbox_animation, (AnimationHandlers) {
-    .stopped = anim_stopped_handler
-  }, NULL);
-  animation_schedule((Animation*) s_beatbox_animation);
+		.stopped = anim_stopped_handler
+	}, NULL);
+	animation_schedule((Animation*) s_beatbox_animation);
 }
 
 void animationSetup(){
@@ -448,43 +538,76 @@ void animationSetup(){
 	text_layer_set_text(s_beat_layer, "    ");
 	s_beat_animation = property_animation_create_layer_frame(text_layer_get_layer(s_beat_layer), NULL, &to_rect);
 	animation_schedule((Animation*) s_beat_animation);
-	
+
 	animationsRunning = true;
 }
 
-void setTeam(int x){
+void setTeam(int x, int who){
 	if(x == 143){
 		time_t temp = time(NULL); 
 		struct tm *tick_time = localtime(&temp);
 		int wday = tick_time->tm_wday;
 		int day = tick_time->tm_yday;
-		if(wday != 6 && random == 0){
-			int oldrandTeam = randTeam;
-			do {
-				randTeam = rand() % 142;
-			}while(oldrandTeam == randTeam && randTeam != badteam);
-			
-			persist_write_int(PER_RANDTEAM, randTeam);
-			random = 1;
-			persist_write_int(PER_RANDOM, random);
-			daysince = day - wday;
-			persist_write_int(PER_DAYSINCE, daysince);
-		}
-		if(wday == 0 || (day - daysince) > 6){
-			APP_LOG(APP_LOG_LEVEL_DEBUG, "Reset");
-			random = 0;
-			daysince = 7;
-			persist_write_int(PER_DAYSINCE, 7);
-			persist_write_int(PER_RANDOM, random);
-		}
-		window_set_background_color(s_window, (GColor)TEAM_COLORS[randTeam]);
+		if(who == 0){
+			if(wday != 6 && random == 0){
+				int oldrandTeam = randTeam;
+				do {
+					randTeam = rand() % 142;
+				}while(oldrandTeam == randTeam && randTeam != badteam && randTeamBad != randTeam);
 
-		if(s_res_logo != NULL){
-			gbitmap_destroy(s_res_logo);
+				persist_write_int(PER_RANDTEAM, randTeam);
+				random = 1;
+				persist_write_int(PER_RANDOM, random);
+				daysince = day - wday;
+				persist_write_int(PER_DAYSINCE, daysince);
+			}
+			if(wday == 0 || (day - daysince) > 6){
+				APP_LOG(APP_LOG_LEVEL_DEBUG, "Reset");
+				random = 0;
+				daysince = 7;
+				persist_write_int(PER_DAYSINCE, 7);
+				persist_write_int(PER_RANDOM, random);
+			}
+
+			window_set_background_color(s_window, (GColor)TEAM_COLORS[randTeam]);
+
+			if(s_res_logo != NULL){
+				gbitmap_destroy(s_res_logo);
+			}
+			s_res_logo = gbitmap_create_with_resource(TEAM_ICON[randTeam]);
+			bitmap_layer_set_bitmap(logo, s_res_logo);
+			layer_mark_dirty(bitmap_layer_get_layer(logo));
 		}
-		s_res_logo = gbitmap_create_with_resource(TEAM_ICON[randTeam]);
-		bitmap_layer_set_bitmap(logo, s_res_logo);
-		layer_mark_dirty(bitmap_layer_get_layer(logo));
+		else{
+			if(wday != 6 && randombad == 0){
+				int oldrandTeam2 = randTeamBad;
+				do {
+					randTeamBad = rand() % 142;
+				}while(oldrandTeam2 == randTeamBad && randTeamBad != team && randTeamBad != randTeam);
+
+				persist_write_int(PER_RANDTEAMBAD, randTeamBad);
+				randombad = 1;
+				persist_write_int(PER_RANDOMBAD, randombad);
+				daysince2 = day - wday;
+				persist_write_int(PER_DAYSINCE2, daysince2);
+			}
+			if(wday == 0 || (day - daysince2) > 6){
+				APP_LOG(APP_LOG_LEVEL_DEBUG, "Reset");
+				randombad = 0;
+				daysince2 = 7;
+				persist_write_int(PER_DAYSINCE2, 7);
+				persist_write_int(PER_RANDOMBAD, randombad);
+			}
+
+			window_set_background_color(s_window, (GColor)TEAM_COLORS[randTeamBad]);
+
+			if(s_res_logo != NULL){
+				gbitmap_destroy(s_res_logo);
+			}
+			s_res_logo = gbitmap_create_with_resource(TEAM_ICON[randTeamBad]);
+			bitmap_layer_set_bitmap(logo, s_res_logo);
+			layer_mark_dirty(bitmap_layer_get_layer(logo));
+		}
 
 	}
 	else{
@@ -500,15 +623,51 @@ void setTeam(int x){
 }
 
 void setbadTeam(int x){
-	
-	bitmap_layer_set_bitmap(beatteam, s_res_badteam);
-	
-	if(s_res_logo != NULL){
-		gbitmap_destroy(s_res_badteam);
+	if(x ==143){
+		time_t temp = time(NULL); 
+		struct tm *tick_time = localtime(&temp);
+		int wday = tick_time->tm_wday;
+		int day = tick_time->tm_yday;
+		if(wday != 6 && randombad == 0){
+			int oldrandTeam2 = randTeamBad;
+			do {
+				randTeamBad = rand() % 142;
+			}while(oldrandTeam2 == randTeamBad && randTeamBad != team && randTeamBad != randTeam);
+
+			persist_write_int(PER_RANDTEAMBAD, randTeamBad);
+			randombad = 1;
+			persist_write_int(PER_RANDOMBAD, randombad);
+			daysince2 = day - wday;
+			persist_write_int(PER_DAYSINCE2, daysince2);
+		}
+		if(wday == 0 || (day - daysince2) > 6){
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "Reset");
+			randombad = 0;
+			daysince2 = 7;
+			persist_write_int(PER_DAYSINCE2, 7);
+			persist_write_int(PER_RANDOMBAD, randombad);
+		}
+
+		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
+
+		if(s_res_logo != NULL){
+			gbitmap_destroy(s_res_badteam);
+		}
+		s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[randTeamBad]);
+		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
+		layer_mark_dirty(bitmap_layer_get_layer(beatteam));
+
 	}
-	s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[x]);
-	bitmap_layer_set_bitmap(beatteam, s_res_badteam);
-	layer_mark_dirty(bitmap_layer_get_layer(beatteam));
+	else{
+		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
+
+		if(s_res_logo != NULL){
+			gbitmap_destroy(s_res_badteam);
+		}
+		s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[x]);
+		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
+		layer_mark_dirty(bitmap_layer_get_layer(beatteam));
+	}
 }
 
 //Process the data coming from the configruable
@@ -591,14 +750,8 @@ void process_tuple(Tuple *t){
 		persist_write_int(PER_BADTEAM, badteam);
 		break;
 		case KEY_WINDOW:
-		if(value == 0){
-			mainWindow = 0;
-			persist_write_int(PER_WINDOW, 0);
-		}
-		else{
-			mainWindow = 1;
-			persist_write_int(PER_WINDOW, 1);
-		}
+		mainWindow = value;
+		persist_write_int(PER_WINDOW, mainWindow);
 		break;
 		case KEY_COUNTDOWN:
 		if(value == 0){
@@ -619,14 +772,8 @@ void process_tuple(Tuple *t){
 		}
 		break;
 		case KEY_COUNTDOWNDEFAULT:
-		if(value == 0){
-			countdownDEFAULT = 0;
-			persist_write_int(PER_COUNTDOWNDEFAULT, 0);
-		}
-		else{
-			countdownDEFAULT = 1;
-			persist_write_int(PER_COUNTDOWNDEFAULT, 1);
-		}
+		countdownDEFAULT = value;
+		persist_write_int(PER_COUNTDOWNDEFAULT, countdownDEFAULT);
 		break;
 		case KEY_COUNTDOWNANI:
 		if(value == 0){
@@ -655,6 +802,26 @@ void process_tuple(Tuple *t){
 		case KEY_DELAY:
 		delay = value;
 		persist_write_int(PER_DELAY, delay);
+		break;
+		case KEY_GAMETIME:
+		gametime = value;
+		persist_write_int(PER_GAMETIME, gametime);
+		break;
+		case KEY_GAMEMIN:
+		gamemin = value;
+		persist_write_int(PER_GAMEMIN, gamemin);
+		break;
+		case KEY_GAMEMONTH:
+		gamemonth = value;
+		persist_write_int(PER_GAMEMONTH, gamemonth);
+		break;
+		case KEY_GAMEAPM:
+		gameapm = value;
+		persist_write_int(PER_GAMEAPM, gameapm);
+		break;
+		case KEY_GAMEYEAR:
+		gameyear = value;
+		persist_write_int(PER_GAMEYEAR, gameyear);
 		break;
   }
 	
@@ -686,7 +853,7 @@ void inbox(DictionaryIterator *iter, void *context){
 		}
 		
 		if(!outdated){
-			setTeam(team);
+			setTeam(team, 0);
 		}
 
 		if(runAnimation == 1){
@@ -711,7 +878,7 @@ void inbox(DictionaryIterator *iter, void *context){
 	}
 	else{
 		if(!outdated){
-			setTeam(badteam);
+			setTeam(badteam, 1);
 		}
 		runAnimation = 0;
 		s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
@@ -736,10 +903,10 @@ static void main_window_load(Window *window) {
 	logo = initBitmap(16, 3, 115, 115, s_res_clear, s_window);
 	
 	if(mainWindow == 0){
-		setTeam(team);
+		setTeam(team, 0);
 	}
 	else{
-		setTeam(badteam);
+		setTeam(badteam, 1);
 		s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
 		layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
 		layer_add_child(window_layer, s_beatbox_layer);
@@ -892,6 +1059,38 @@ static void init() {
 	if(persist_exists(PER_DELAY)){
 		delay = persist_read_int(PER_DELAY);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 14: %d", delay);
+	}
+	if(persist_exists(PER_GAMETIME)){
+		gametime = persist_read_int(PER_GAMETIME);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 15: %d", gametime);
+	}
+	if(persist_exists(PER_GAMEMIN)){
+		gamemin = persist_read_int(PER_GAMEMIN);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 16: %d", gamemin);
+	}
+	if(persist_exists(PER_GAMEMONTH)){
+		gamemonth = persist_read_int(PER_GAMEMONTH);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 17: %d", gamemonth);
+	}
+	if(persist_exists(PER_GAMEAPM)){
+		gameapm = persist_read_int(PER_GAMEAPM);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 18: %d", gameapm);
+	}
+	if(persist_exists(PER_GAMEYEAR)){
+		gameyear = persist_read_int(PER_GAMEYEAR);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 19: %d", gameyear);
+	}
+	if(persist_exists(PER_RANDOMBAD)){
+		randombad = persist_read_int(PER_RANDOMBAD);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 20: %d", randombad);
+	}
+	if(persist_exists(PER_RANDTEAMBAD)){
+		randTeamBad = persist_read_int(PER_RANDTEAMBAD);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 21: %d", randTeamBad);
+	}
+	if(persist_exists(PER_DAYSINCE2)){
+		daysince2 = persist_read_int(PER_DAYSINCE2);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 22: %d", daysince2);
 	}
 
 	// Show the Window on the watch, with animated=true
