@@ -6,50 +6,73 @@ static Layer *s_info_layer, *s_beatbox_layer, *s_badteambox_layer;
 static BitmapLayer *logo, *bt, *bat, *beatteam;
 static GBitmap *s_res_logo, *s_res_clear, *s_res_bt, *s_res_bat, *s_res_batCharge, *s_res_badteam, *s_res_update;
 static TextLayer *s_time_layer, *s_date_layer, *s_date2_layer, *s_beat_layer, *s_count1_layer, *s_count2_layer;
-int recon = 1, discon = 3, count = 0, runAnimation = 1, mainWindow = 0, secondsTime = 0, countdown = 0,
+int recon = 1, discon = 3, count = 0, runAnimation = 1, mainWindow = 0, countdown = 0,
 		countdownDEFAULT = 1, countdownAni = 1, random = 0, randombad = 0, randTeam, randTeamBad, gameday, daysince, 
-		daysince2, delay = 1, gametime, gamemin, gamemonth, gameapm, gameyear;
+		daysince2, delay = 1, gametime, gamemin, gamemonth, gameapm, gameyear, height, width;
 int team = 0;
-int badteam = 143;//20;
+int badteam = 20;
 int version = 250;
 bool btHistory = true, firstTime = true, outdated = false, animationsRunning = false, timeup;
 static int s_toggle, s_toggle2, s_toggle3;
+
+int count99 = 0;
 
 //Declare animations so that they can be used before they have been defined
 static void beat_animation();
 
 //Use this as a universal destroy animation
-static void destroy_property_animation(PropertyAnimation **layer_animation) {}
+static void destroy_property_animation(PropertyAnimation **layer_animation) {
+  #ifdef PBL_PLATFORM_APLITE
+		if (*layer_animation == NULL) {
+			return;
+		}
+
+		if (animation_is_scheduled((Animation*) *layer_animation)) {
+			animation_unschedule((Animation*) *layer_animation);
+		}
+
+		property_animation_destroy(*layer_animation);
+		*layer_animation = NULL;
+	#endif
+}
 
 static void layer_update_proc(Layer *layer, GContext *ctx){
-	GRect infoRect = GRect(0, 118, 144, 50);
-	GRect border = GRect(-1, 117, 146, 51);
-	GPoint origin = GPoint(121,154);
-	GPoint top = GPoint(121,139);
-	GPoint right = GPoint(137,154);
+	GRect infoRect = GRect(0, (height / 2) + 34, width, 60);
+	GRect border = GRect(-1, (height / 2) + 33, width + 2, 61);
+	#ifdef PBL_RECT
+		GPoint origin = GPoint(121,154);
+		GPoint top = GPoint(121,139);
+		GPoint right = GPoint(137,154);
+	#endif
 	
 	graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_fill_rect(ctx, border, 6, GCornersTop);
 	graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, infoRect, 5, GCornersTop);
 	
-	graphics_context_set_stroke_color(ctx, GColorBlack);
-	graphics_draw_line(ctx, origin, top);
-	graphics_draw_line(ctx, origin, right);
+	#ifdef PBL_RECT
+		graphics_context_set_stroke_color(ctx, GColorBlack);
+		graphics_draw_line(ctx, origin, top);
+		graphics_draw_line(ctx, origin, right);
+	#endif
 }
 
 static void layer_update_proc2(Layer *layer, GContext *ctx){
-	GRect beatRect = GRect(0, 0, 55, 40);
+	//HERE
+	#ifdef PBL_RECT
+		GRect beatRect = GRect(0, 0, 55, 40);
+	#elif PBL_ROUND
+		GRect beatRect = GRect(63, 0, 55, 40);
+	#endif
 	
 	graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, beatRect, 0, 0);
-	
 	graphics_context_set_stroke_color(ctx, GColorBlack);
   graphics_draw_rect(ctx, beatRect);
 }
 
 static void layer_update_proc3(Layer *layer, GContext *ctx){
-	GRect badteamRect = GRect(0, 0, 200, 144);
+	GRect badteamRect = GRect(0, 0, height+20, width);
 	
 	graphics_context_set_fill_color(ctx, (GColor)TEAM_COLORS[badteam]);
   graphics_fill_rect(ctx, badteamRect, 0, 0);
@@ -66,15 +89,11 @@ BitmapLayer* initBitmap(int x, int y, int w, int h, GBitmap *pic, Window *window
 }
 
 //Function to initialize all text layers
-TextLayer* initText(int x, int y, int w, int h, GFont font, Window *window){
+TextLayer* initText(int x, int y, int w, int h, char* font, Window *window){
   TextLayer* textLayer = text_layer_create(GRect(x, y, w, h));
   text_layer_set_background_color(textLayer, GColorClear);
 	
-	#ifdef PBL_COLOR
-		text_layer_set_text_color(textLayer, GColorBlack);
-	#else
-  	text_layer_set_text_color(textLayer, GColorBlack);
-	#endif
+  text_layer_set_text_color(textLayer, GColorBlack);
 
   // Improve the layout to be more like a watchface
   text_layer_set_font(textLayer, fonts_get_system_font(font));
@@ -373,25 +392,13 @@ static void update_time() {
 	}
 	else{
 		// Write the current hours and minutes into the buffer
-		if(secondsTime == 0){
-			text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS));
-			if(clock_is_24h_style() == true) {
-				//Use 2h hour format
-				strftime(buffer1, sizeof("00:00"), "%H:%M", tick_time);
-			} else {
-				//Use 12 hour format
-				strftime(buffer1, sizeof("00:00"), "%I:%M", tick_time);
-			}
-		}
-		else{
-			text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM));
-			if(clock_is_24h_style() == true) {
-				//Use 2h hour format
-				strftime(buffer1, sizeof("00:00:00"), "%H:%M:%S", tick_time);
-			} else {
-				//Use 12 hour format
-				strftime(buffer1, sizeof("00:00:00"), "%I:%M:%S", tick_time);
-			}
+		text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS));
+		if(clock_is_24h_style() == true) {
+			//Use 24h hour format
+			strftime(buffer1, sizeof("00:00"), "%H:%M", tick_time);
+		} else {
+			//Use 12 hour format
+			strftime(buffer1, sizeof("00:00"), "%I:%M", tick_time);
 		}
 	}
 	strftime(buffer2, sizeof("Jan"), "%b", tick_time);
@@ -401,7 +408,6 @@ static void update_time() {
 	text_layer_set_text(s_time_layer, buffer1);
 	text_layer_set_text(s_date_layer, buffer2);
 	text_layer_set_text(s_date2_layer, buffer3);
-
 }
 
 //Handle when it physically chages minutes
@@ -420,14 +426,14 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
 		layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
 		text_layer_set_text(s_beat_layer, "BEAT");
-		if(secondsTime == 0){
-			tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-		}
+		tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 		firstTime = false;
 	}
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "GO");
+	beat_animation();
+	
 }
 
-//Animation handler for the boomerang
 static void anim_stopped_handler(Animation *animation, bool finished, void *context) {
 	// Schedule the next one, unless the app is exiting
 	if (finished) {
@@ -444,13 +450,17 @@ static void anim_stopped_handler(Animation *animation, bool finished, void *cont
 		else{
 			count = 0;
 			if(countdownAni == 1){
-				countdown = 0;
+				if(countdown != 4){
+					countdown = 0;
+				}
 				text_layer_set_text(s_count1_layer, "     ");
 				text_layer_set_text(s_count2_layer, "     ");
 				update_time();
 			}
 			if(countdownAni == 2){
-				countdown = 1;
+				if(countdown != 4){
+					countdown = 1;
+				}
 				update_time();
 			}
 		}
@@ -459,12 +469,17 @@ static void anim_stopped_handler(Animation *animation, bool finished, void *cont
 
 //Beat animation
 static void beat_animation() {
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "Animate");
 	if(countdownAni == 1){
-		countdown = 1;
+		if(countdown != 4){
+			countdown = 1;
+		}
 		update_time();
 	}
 	else if (countdownAni == 2){
-		countdown = 0;
+		if(countdown != 4){
+			countdown = 0;
+		}
 		text_layer_set_text(s_count1_layer, "     ");
 		text_layer_set_text(s_count2_layer, "     ");
 		update_time();
@@ -477,7 +492,7 @@ static void beat_animation() {
 	Layer *layer4 = bitmap_layer_get_layer(beatteam);
 
 	//And move the created text from one spot to the other
-	GRect to_rect2 = (s_toggle2) ? GRect(-200, 0, 200, 144) : GRect(0, 0, 200, 144);
+	GRect to_rect2 = (s_toggle2) ? GRect(-(height + 20), 0, height + 20, width) : GRect(0, 0, height + 20, width);
 	s_toggle2 = !s_toggle2;
 	destroy_property_animation(&s_badteambox_animation);
 	s_badteambox_animation = property_animation_create_layer_frame(layer3, NULL, &to_rect2);
@@ -486,7 +501,7 @@ static void beat_animation() {
 	animation_set_curve((Animation*) s_badteambox_animation, AnimationCurveEaseIn);
 	animation_schedule((Animation*) s_badteambox_animation);
 
-	GRect to_rect3 = (s_toggle3) ? GRect(-115, 3, 115, 115) : GRect(25, 3, 115, 115);
+	GRect to_rect3 = (s_toggle3) ? GRect(-115, (height / 2) - 81, 115, 115) : GRect((width / 2) - 56, (height / 2) - 81, 115, 115);
 	s_toggle3 = !s_toggle3;
 	destroy_property_animation(&s_badteam_animation);
 	s_badteam_animation = property_animation_create_layer_frame(layer4, NULL, &to_rect3);
@@ -495,7 +510,11 @@ static void beat_animation() {
 	animation_set_curve((Animation*) s_badteam_animation, AnimationCurveEaseIn);
 	animation_schedule((Animation*) s_badteam_animation);
 
-	GRect to_rect = (s_toggle) ? GRect(0, -40, 55, 40) : GRect(0, 0, 55, 40);
+	#ifdef PBL_RECT
+		GRect to_rect = (s_toggle) ? GRect(0, -40, 55, 40) : GRect(0, 0, 55, 40);
+	#elif PBL_ROUND
+		GRect to_rect = (s_toggle) ? GRect(63, -40, 55, 40) : GRect(63, 0, 55, 40);
+	#endif
 	s_toggle = !s_toggle;
 	destroy_property_animation(&s_beat_animation);
 	s_beat_animation = property_animation_create_layer_frame(layer, NULL, &to_rect);
@@ -517,24 +536,31 @@ static void beat_animation() {
 
 void animationSetup(){
 	Layer *window_layer = window_get_root_layer(s_window);
-	s_badteambox_layer = layer_create(GRect(-20, 0, 200, 144));
+	s_badteambox_layer = layer_create(GRect(-(height + 20), 0, height + 20, width));
 	layer_add_child(window_layer, s_badteambox_layer);
-	GRect to_rect2 = GRect(-200, 0, 200, 144);
+	GRect to_rect2 = GRect(-(height + 20), 0, height + 20, width);
 	s_badteambox_animation = property_animation_create_layer_frame(s_badteambox_layer, NULL, &to_rect2);
 	animation_schedule((Animation*) s_badteambox_animation);
 
-	beatteam = initBitmap(25, 3, 115, 115, s_res_clear, s_window);
-	GRect to_rect3 = GRect(-115, 3, 115, 115);
+	beatteam = initBitmap((width / 2) - 56, (height / 2) - 81, 115, 115, s_res_clear, s_window);
+	GRect to_rect3 = GRect(-115, (height / 2) - 81, 115, 115);
 	s_badteam_animation = property_animation_create_layer_frame(bitmap_layer_get_layer(beatteam), NULL, &to_rect3);
 	animation_schedule((Animation*) s_badteam_animation);
 
-	s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
-	layer_add_child(window_layer, s_beatbox_layer);
-	GRect to_rect = GRect(0, -40, 55, 40);
+	//HERE
+	#ifdef PBL_RECT
+		s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
+		layer_add_child(window_layer, s_beatbox_layer);
+		GRect to_rect = GRect(0, -40, 55, 40);
+	#elif PBL_ROUND
+		s_beatbox_layer = layer_create(GRect(63, 0, 55, 40));
+		layer_add_child(window_layer, s_beatbox_layer);
+		GRect to_rect = GRect(63, -40, 55, 40);
+	#endif
 	s_beatbox_animation = property_animation_create_layer_frame(s_beatbox_layer, NULL, &to_rect);
 	animation_schedule((Animation*) s_beatbox_animation);
 
-	s_beat_layer = initText(0, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+	s_beat_layer = initText(63, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
 	text_layer_set_text(s_beat_layer, "    ");
 	s_beat_animation = property_animation_create_layer_frame(text_layer_get_layer(s_beat_layer), NULL, &to_rect);
 	animation_schedule((Animation*) s_beat_animation);
@@ -755,7 +781,7 @@ void process_tuple(Tuple *t){
 		break;
 		case KEY_COUNTDOWN:
 		if(value == 0){
-			countdown = 0;
+			countdown = 4;
 			persist_write_int(PER_COUNTDOWN, 0);
 			text_layer_set_text(s_count1_layer, "     ");
 			text_layer_set_text(s_count2_layer, "     ");
@@ -782,7 +808,9 @@ void process_tuple(Tuple *t){
 		}
 		else if(value == 1){
 			countdownAni = 1;
-			countdown = 0;
+			if(countdown != 4){
+				countdown = 0;
+			}
 			persist_write_int(PER_COUNTDOWNANI, 1);
 			persist_write_int(PER_COUNTDOWN, 0);
 			text_layer_set_text(s_count1_layer, "     ");
@@ -790,7 +818,9 @@ void process_tuple(Tuple *t){
 		}
 		else{
 			countdownAni = 2;
-			countdown = 1;
+			if(countdown != 4){
+				countdown = 1;
+			}
 			persist_write_int(PER_COUNTDOWNANI, 2);
 			persist_write_int(PER_COUNTDOWN, 1);
 		}
@@ -861,14 +891,27 @@ void inbox(DictionaryIterator *iter, void *context){
 				animationSetup();
 			}
 			else{
-				s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
+				//HERE
+				#ifdef PBL_RECT
+					s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
+				#elif PBL_ROUND
+					s_beatbox_layer = layer_create(GRect(63, 0, 55, 40));
+				#endif
 				layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
 				layer_add_child(window_layer, s_beatbox_layer);
-				GRect to_rect = GRect(0, -40, 55, 40);
+				#ifdef PBL_RECT
+					GRect to_rect = GRect(0, -40, 55, 40);
+				#elif PBL_ROUND
+					GRect to_rect = GRect(63, -40, 55, 40);
+				#endif
 				s_beatbox_animation = property_animation_create_layer_frame(s_beatbox_layer, NULL, &to_rect);
 				animation_schedule((Animation*) s_beatbox_animation);
 
-				s_beat_layer = initText(0, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+				#ifdef PBL_RECT
+					s_beat_layer = initText(0, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+				#elif PBL_ROUND
+					s_beat_layer = initText(63, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+				#endif
 				text_layer_set_text(s_beat_layer, "BEAT");
 				s_beat_animation = property_animation_create_layer_frame(text_layer_get_layer(s_beat_layer), NULL, &to_rect);
 				animation_schedule((Animation*) s_beat_animation);
@@ -880,11 +923,20 @@ void inbox(DictionaryIterator *iter, void *context){
 		if(!outdated){
 			setTeam(badteam, 1);
 		}
+		//HERE
 		runAnimation = 0;
-		s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
+		#ifdef PBL_RECT
+			s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
+		#elif PBL_ROUND
+			s_beatbox_layer = layer_create(GRect(63, 0, 55, 40));
+		#endif
 		layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
 		layer_add_child(window_layer, s_beatbox_layer);
-		s_beat_layer = initText(0, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+		#ifdef PBL_RECT
+			s_beat_layer = initText(0, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+		#elif PBL_ROUND
+			s_beat_layer = initText(63, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+		#endif
 		text_layer_set_text(s_beat_layer, "BEAT");
 	}
 	
@@ -899,50 +951,86 @@ static void main_window_load(Window *window) {
 	#ifndef PBL_SDK_3
     window_set_fullscreen(s_window, true);
 	#endif
+  
+  #ifdef PBL_RECT
+		height = 168;
+		width = 144;
+	#elif PBL_ROUND
+		height = 180;
+		width = 180;
+	#endif
 
-	logo = initBitmap(16, 3, 115, 115, s_res_clear, s_window);
+	logo = initBitmap((width / 2) - 56, (height / 2) - 81, 115, 115, s_res_clear, s_window);
+	
+	s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[badteam]);
 	
 	if(mainWindow == 0){
 		setTeam(team, 0);
 	}
 	else{
 		setTeam(badteam, 1);
-		s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
+		//HERE
+		#ifdef PBL_RECT
+			s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
+		#elif PBL_ROUND
+			s_beatbox_layer = layer_create(GRect(63, 0, 55, 40));
+		#endif
 		layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
 		layer_add_child(window_layer, s_beatbox_layer);
-		s_beat_layer = initText(0, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+		
+		#ifdef PBL_RECT
+			s_beat_layer = initText(0, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+		#elif PBL_ROUND
+			s_beat_layer = initText(63, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
+		#endif
 		text_layer_set_text(s_beat_layer, "BEAT");
 		runAnimation = 0;
 	}
-	
-	s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[badteam]);
 	
 	if(runAnimation == 1){		
 		animationSetup();
 	}
 				
 	// Create Layer that the path will be drawn on
-  s_info_layer = layer_create(GRect(0, 0, 144, 168));
+  s_info_layer = layer_create(GRect(0, 0, width, height));
   layer_set_update_proc(s_info_layer, layer_update_proc);
   layer_add_child(window_layer, s_info_layer);
 	
-	s_time_layer = initText(0, 115, 120, 50, FONT_KEY_LECO_42_NUMBERS, s_window);
-	text_layer_set_text(s_time_layer, "20:00:00");
-	s_date_layer = initText(107, 120, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
-	text_layer_set_text(s_date_layer, "Jan");
-	s_date2_layer = initText(110, 135, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
-	text_layer_set_text(s_date_layer, "00");
-	s_count1_layer = initText(15, 153, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
-	text_layer_set_text(s_count1_layer, "     ");
-	s_count2_layer = initText(65, 153, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
-	text_layer_set_text(s_count2_layer, "     ");
+	#ifdef PBL_RECT
+		s_time_layer = initText(0, 115, 120, 50, FONT_KEY_LECO_42_NUMBERS, s_window);
+		text_layer_set_text(s_time_layer, "20:00");
+		s_date_layer = initText(107, 120, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
+		text_layer_set_text(s_date_layer, "Jan");
+		s_date2_layer = initText(110, 135, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
+		text_layer_set_text(s_date_layer, "00");
+		s_count1_layer = initText(15, 153, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
+		text_layer_set_text(s_count1_layer, "     ");
+		s_count2_layer = initText(65, 153, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
+		text_layer_set_text(s_count2_layer, "     ");
+	#elif PBL_ROUND
+		s_time_layer = initText(30, 115, 120, 50, FONT_KEY_LECO_42_NUMBERS, s_window);
+		text_layer_set_text(s_time_layer, "20:00");
+		s_date_layer = initText(133, 122, 45, 25, FONT_KEY_GOTHIC_14, s_window);
+		text_layer_set_text(s_date_layer, "Jan");
+		s_date2_layer = initText(131, 133, 45, 25, FONT_KEY_GOTHIC_14, s_window);
+		text_layer_set_text(s_date_layer, "00");
+		s_count1_layer = initText(45, 153, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
+		text_layer_set_text(s_count1_layer, "     ");
+		s_count2_layer = initText(90, 153, 45, 25, FONT_KEY_GOTHIC_14_BOLD, s_window);
+		text_layer_set_text(s_count2_layer, "     ");
+	#endif
 	
 	s_res_bt = gbitmap_create_with_resource(RESOURCE_ID_bt);
 	s_res_bat = gbitmap_create_with_resource(RESOURCE_ID_bat);
 	s_res_batCharge = gbitmap_create_with_resource(RESOURCE_ID_batCharge);
 	
-	bt = initBitmap(122, 157, 6, 7, s_res_clear, s_window);
-	bat = initBitmap(132, 157, 4, 7, s_res_clear, s_window);
+	#ifdef PBL_RECT
+		bt = initBitmap(122, 157, 6, 7, s_res_clear, s_window);
+		bat = initBitmap(132, 157, 4, 7, s_res_clear, s_window);
+	#elif PBL_ROUND
+		bt = initBitmap(26, 129, 6, 7, s_res_clear, s_window);
+		bat = initBitmap(28, 139, 4, 7, s_res_clear, s_window);
+	#endif
 	
 	// Make sure the time is displayed from the start
   update_time();
@@ -1105,9 +1193,9 @@ static void init() {
 	// Subsribe to Accelorator services
 	accel_tap_service_subscribe(tap_handler);
 	
-	if((firstTime && runAnimation == 1) || secondsTime == 1){
+	if(firstTime && runAnimation == 1){
 		// Register with TickTimerService as seconds initially
-		tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+		//tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Seconds Set");
 	}
 	else{
@@ -1118,7 +1206,7 @@ static void init() {
 	
 	// Subscribe to js data
 	app_message_register_inbox_received(inbox);
-  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  app_message_open(250, 32);//app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 }
 
 static void deinit() {

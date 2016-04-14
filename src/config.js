@@ -7,7 +7,7 @@ Pebble.addEventListener("ready",
 Pebble.addEventListener("showConfiguration",
   function(e) {
     //Load the remote config page
-    Pebble.openURL("http://kflinderman.github.io/NCAA/index2");
+    Pebble.openURL("http://kflinderman.github.io/NCAA/index");
   }
 );
 
