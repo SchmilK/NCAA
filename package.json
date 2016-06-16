@@ -1,0 +1,1333 @@
+{
+    "author": "kenny.linderman@gmail.com",
+    "dependencies": {},
+    "keywords": [],
+    "name": "ncaa-fbs",
+    "pebble": {
+        "capabilities": [
+            "configurable",
+            "health"
+        ],
+        "displayName": "NCAA FBS Watchface",
+        "enableMultiJS": false,
+        "messageKeys": {
+            "KEY_ANIMATION": 0,
+            "KEY_AUTORANGE": 17,
+            "KEY_BADTEAM": 4,
+            "KEY_COUNTDOWN": 7,
+            "KEY_COUNTDOWNANI": 9,
+            "KEY_COUNTDOWNDEFAULT": 8,
+            "KEY_DELAY": 12,
+            "KEY_DISCONNECT": 1,
+            "KEY_EDAMPM": 24,
+            "KEY_EDHR": 22,
+            "KEY_EDMIN": 23,
+            "KEY_GAMEAPM": 15,
+            "KEY_GAMEDAY": 10,
+            "KEY_GAMEMIN": 13,
+            "KEY_GAMEMONTH": 14,
+            "KEY_GAMETIME": 11,
+            "KEY_GAMEYEAR": 16,
+            "KEY_QUIET": 18,
+            "KEY_RECONNECT": 2,
+            "KEY_STAMPM": 21,
+            "KEY_STEPS": 25,
+            "KEY_STHR": 19,
+            "KEY_STMIN": 20,
+            "KEY_TD": 26,
+            "KEY_TEAM": 3,
+            "KEY_VERSION": 6,
+            "KEY_WINDOW": 5
+        },
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/ftbl",
+                    "memoryFormat": "Smallest",
+                    "name": "ftbl",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/illinois.png",
+                    "memoryFormat": "Smallest",
+                    "name": "illinois",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/NCAAIcon.png",
+                    "memoryFormat": "Smallest",
+                    "menuIcon": true,
+                    "name": "icon",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/aac.png",
+                    "memoryFormat": "Smallest",
+                    "name": "aac",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/big12.png",
+                    "memoryFormat": "Smallest",
+                    "name": "big12",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/big10.png",
+                    "memoryFormat": "Smallest",
+                    "name": "big10",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/acc.png",
+                    "memoryFormat": "Smallest",
+                    "name": "acc",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ncaa.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ncaa",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/wyoming.png",
+                    "memoryFormat": "Smallest",
+                    "name": "wyoming",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/washington.png",
+                    "memoryFormat": "Smallest",
+                    "name": "washington",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/uab.png",
+                    "memoryFormat": "Smallest",
+                    "name": "uab",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/playoff.png",
+                    "memoryFormat": "Smallest",
+                    "name": "playoff",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/wake.png",
+                    "memoryFormat": "Smallest",
+                    "name": "wake",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/vt.png",
+                    "memoryFormat": "Smallest",
+                    "name": "vt",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/wvu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "wvu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/wku.png",
+                    "memoryFormat": "Smallest",
+                    "name": "wku",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/wisconsin.png",
+                    "memoryFormat": "Smallest",
+                    "name": "wisconsin",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/westernmichigan.png",
+                    "memoryFormat": "Smallest",
+                    "name": "westernmichigan",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/vandy.png",
+                    "memoryFormat": "Smallest",
+                    "name": "vandy",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/utep.png",
+                    "memoryFormat": "Smallest",
+                    "name": "utep",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/utahst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "utahst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/utah.png",
+                    "memoryFormat": "Smallest",
+                    "name": "utah",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/unlv.png",
+                    "memoryFormat": "Smallest",
+                    "name": "unlv",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/washingtonst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "washingtonst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/uncc.png",
+                    "memoryFormat": "Smallest",
+                    "name": "uncc",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ucla.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ucla",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/troy.png",
+                    "memoryFormat": "Smallest",
+                    "name": "troy",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/toledo.png",
+                    "memoryFormat": "Smallest",
+                    "name": "toledo",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/utsa.png",
+                    "memoryFormat": "Smallest",
+                    "name": "utsa",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/tulsa.png",
+                    "memoryFormat": "Smallest",
+                    "name": "tulsa",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/tulane.png",
+                    "memoryFormat": "Smallest",
+                    "name": "tulane",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/texastech.png",
+                    "memoryFormat": "Smallest",
+                    "name": "texastech",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/texasst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "texasst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/tamu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "tamu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/tcu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "tcu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/texas.png",
+                    "memoryFormat": "Smallest",
+                    "name": "texas",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/syracuse.png",
+                    "memoryFormat": "Smallest",
+                    "name": "syracuse",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/tennessee.png",
+                    "memoryFormat": "Smallest",
+                    "name": "tennessee",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/temple.png",
+                    "memoryFormat": "Smallest",
+                    "name": "temple",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/stanford.png",
+                    "memoryFormat": "Smallest",
+                    "name": "stanford",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/southernmiss.png",
+                    "memoryFormat": "Smallest",
+                    "name": "southernmiss",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/southerncal.png",
+                    "memoryFormat": "Smallest",
+                    "name": "southerncal",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/usf.png",
+                    "memoryFormat": "Smallest",
+                    "name": "usf",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/sanjosest.png",
+                    "memoryFormat": "Smallest",
+                    "name": "sanjosest",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/sandiegost.png",
+                    "memoryFormat": "Smallest",
+                    "name": "sandiegost",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/southalabama.png",
+                    "memoryFormat": "Smallest",
+                    "name": "southalabama",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/smu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "smu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/rutgers.png",
+                    "memoryFormat": "Smallest",
+                    "name": "rutgers",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/rice.png",
+                    "memoryFormat": "Smallest",
+                    "name": "rice",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/oklahomast.png",
+                    "memoryFormat": "Smallest",
+                    "name": "oklahomast",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/oklahoma.png",
+                    "memoryFormat": "Smallest",
+                    "name": "oklahoma",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ohio.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ohio",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/notredame.png",
+                    "memoryFormat": "Smallest",
+                    "name": "notredame",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/niu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "niu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/northtexas.png",
+                    "memoryFormat": "Smallest",
+                    "name": "northtexas",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ncstate.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ncstate",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/unc.png",
+                    "memoryFormat": "Smallest",
+                    "name": "unc",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/newmexicost.png",
+                    "memoryFormat": "Smallest",
+                    "name": "newmexicost",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/newmexico.png",
+                    "memoryFormat": "Smallest",
+                    "name": "newmexico",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/nevada.png",
+                    "memoryFormat": "Smallest",
+                    "name": "nevada",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/nebraska.png",
+                    "memoryFormat": "Smallest",
+                    "name": "nebraska",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/navy.png",
+                    "memoryFormat": "Smallest",
+                    "name": "navy",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/northwestern.png",
+                    "memoryFormat": "Smallest",
+                    "name": "northwestern",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/houston.png",
+                    "memoryFormat": "Smallest",
+                    "name": "houston",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/hawaii.png",
+                    "memoryFormat": "Smallest",
+                    "name": "hawaii",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/georgiast.png",
+                    "memoryFormat": "Smallest",
+                    "name": "georgiast",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/gsu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "gsu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/uga.png",
+                    "memoryFormat": "Smallest",
+                    "name": "uga",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/fresnost.png",
+                    "memoryFormat": "Smallest",
+                    "name": "fresnost",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/florida.png",
+                    "memoryFormat": "Smallest",
+                    "name": "florida",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/easternmichigan.png",
+                    "memoryFormat": "Smallest",
+                    "name": "easternmichigan",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ecu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ecu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/duke.png",
+                    "memoryFormat": "Smallest",
+                    "name": "duke",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/byu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "byu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/bowlinggreen.png",
+                    "memoryFormat": "Smallest",
+                    "name": "bowlinggreen",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/bostoncollege.png",
+                    "memoryFormat": "Smallest",
+                    "name": "bostoncollege",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/boisest.png",
+                    "memoryFormat": "Smallest",
+                    "name": "boisest",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/baylor.png",
+                    "memoryFormat": "Smallest",
+                    "name": "baylor",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ballst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ballst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/auburn.png",
+                    "memoryFormat": "Smallest",
+                    "name": "auburn",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/army.png",
+                    "memoryFormat": "Smallest",
+                    "name": "army",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/arizonast.png",
+                    "memoryFormat": "Smallest",
+                    "name": "arizonast",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/arizona.png",
+                    "memoryFormat": "Smallest",
+                    "name": "arizona",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/appst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "appst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/alabama.png",
+                    "memoryFormat": "Smallest",
+                    "name": "alabama",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/akron.png",
+                    "memoryFormat": "Smallest",
+                    "name": "akron",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/airforce.png",
+                    "memoryFormat": "Smallest",
+                    "name": "airforce",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/bat.png",
+                    "memoryFormat": "Smallest",
+                    "name": "bat",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/bt.png",
+                    "memoryFormat": "Smallest",
+                    "name": "bt",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/batCharge.png",
+                    "memoryFormat": "Smallest",
+                    "name": "batCharge",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ohiost.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ohiost",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/meteor.png",
+                    "memoryFormat": "Smallest",
+                    "name": "meteor",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/uva.png",
+                    "memoryFormat": "Smallest",
+                    "name": "uva",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/kstate.png",
+                    "memoryFormat": "Smallest",
+                    "name": "kstate",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/arkansasst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "arkansasst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/arkansas.png",
+                    "memoryFormat": "Smallest",
+                    "name": "arkansas",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/update.png",
+                    "memoryFormat": "Smallest",
+                    "name": "update",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/chaos.png",
+                    "memoryFormat": "Smallest",
+                    "name": "chaos",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/sunbelt.png",
+                    "memoryFormat": "Smallest",
+                    "name": "sunbelt",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/sec.png",
+                    "memoryFormat": "Smallest",
+                    "name": "sec",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/pac12.png",
+                    "memoryFormat": "Smallest",
+                    "name": "pac12",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/mw.png",
+                    "memoryFormat": "Smallest",
+                    "name": "mw",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/mac.png",
+                    "memoryFormat": "Smallest",
+                    "name": "mac",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/cusa.png",
+                    "memoryFormat": "Smallest",
+                    "name": "cusa",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/purdue.png",
+                    "memoryFormat": "Smallest",
+                    "name": "purdue",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/pitt.png",
+                    "memoryFormat": "Smallest",
+                    "name": "pitt",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/pennst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "pennst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/oregonst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "oregonst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/oregon.png",
+                    "memoryFormat": "Smallest",
+                    "name": "oregon",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/odu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "odu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/missouri.png",
+                    "memoryFormat": "Smallest",
+                    "name": "missouri",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/missst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "missst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/olemiss.png",
+                    "memoryFormat": "Smallest",
+                    "name": "olemiss",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/minnesota.png",
+                    "memoryFormat": "Smallest",
+                    "name": "minnesota",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/midtennst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "midtennst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/michiganst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "michiganst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/michigan.png",
+                    "memoryFormat": "Smallest",
+                    "name": "michigan",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/miamioh.png",
+                    "memoryFormat": "Smallest",
+                    "name": "miamioh",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/miami.png",
+                    "memoryFormat": "Smallest",
+                    "name": "miami",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/memphis.png",
+                    "memoryFormat": "Smallest",
+                    "name": "memphis",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/umass.png",
+                    "memoryFormat": "Smallest",
+                    "name": "umass",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/maryland.png",
+                    "memoryFormat": "Smallest",
+                    "name": "maryland",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/marshall.png",
+                    "memoryFormat": "Smallest",
+                    "name": "marshall",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/lsu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "lsu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/louisville.png",
+                    "memoryFormat": "Smallest",
+                    "name": "louisville",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ulm.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ulm",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ull.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ull",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/louisianatech.png",
+                    "memoryFormat": "Smallest",
+                    "name": "louisianatech",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/kentucky.png",
+                    "memoryFormat": "Smallest",
+                    "name": "kentucky",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/kentst.png",
+                    "memoryFormat": "Smallest",
+                    "name": "kentst",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/kansas.png",
+                    "memoryFormat": "Smallest",
+                    "name": "kansas",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/iowast.png",
+                    "memoryFormat": "Smallest",
+                    "name": "iowast",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/iowa.png",
+                    "memoryFormat": "Smallest",
+                    "name": "iowa",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/indiana.png",
+                    "memoryFormat": "Smallest",
+                    "name": "indiana",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/idaho.png",
+                    "memoryFormat": "Smallest",
+                    "name": "idaho",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/gt.PNG",
+                    "memoryFormat": "Smallest",
+                    "name": "gt",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/fsu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "fsu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/fiu.png",
+                    "memoryFormat": "Smallest",
+                    "name": "fiu",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/fau.png",
+                    "memoryFormat": "Smallest",
+                    "name": "fau",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": [
+                        "basalt",
+                        "chalk"
+                    ],
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/uconn.png",
+                    "memoryFormat": "Smallest",
+                    "name": "uconn",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/coloradost.png",
+                    "memoryFormat": "Smallest",
+                    "name": "coloradost",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/colorado.png",
+                    "memoryFormat": "Smallest",
+                    "name": "colorado",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/clemson.png",
+                    "memoryFormat": "Smallest",
+                    "name": "clemson",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/cincinnati.png",
+                    "memoryFormat": "Smallest",
+                    "name": "cincinnati",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/centralmichigan.png",
+                    "memoryFormat": "Smallest",
+                    "name": "centralmichigan",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ucf.png",
+                    "memoryFormat": "Smallest",
+                    "name": "ucf",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/cal.png",
+                    "memoryFormat": "Smallest",
+                    "name": "cal",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/buffalo.png",
+                    "memoryFormat": "Smallest",
+                    "name": "buffalo",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/gamecock.png",
+                    "memoryFormat": "Smallest",
+                    "name": "gamecock",
+                    "spaceOptimization": "storage",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "0290cf07-cc80-4d74-9467-1dde369f7350",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "3.0.0"
+}

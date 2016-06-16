@@ -2,41 +2,91 @@
 	
 static Window *s_window;
 static PropertyAnimation *s_beat_animation, *s_beatbox_animation, *s_badteam_animation, *s_badteambox_animation;
-static Layer *s_info_layer, *s_beatbox_layer, *s_badteambox_layer;
-static BitmapLayer *logo, *bt, *bat, *beatteam;
-static GBitmap *s_res_logo, *s_res_clear, *s_res_bt, *s_res_bat, *s_res_batCharge, *s_res_badteam, *s_res_update;
-static TextLayer *s_time_layer, *s_date_layer, *s_date2_layer, *s_beat_layer, *s_count1_layer, *s_count2_layer;
-int recon = 1, discon = 3, count = 0, runAnimation = 1, mainWindow = 0, countdown = 0,
-		countdownDEFAULT = 1, countdownAni = 1, random = 0, randombad = 0, randTeam, randTeamBad, gameday, daysince, 
-		daysince2, delay = 1, gametime, gamemin, gamemonth, gameapm, gameyear, height, width;
+static Layer *s_info_layer, *s_beatbox_layer, *s_badteambox_layer, *s_health_layerWhite, *s_health_layerBlack;
+static BitmapLayer *logo, *bt, *bat, *beatteam, *ftbl;
+static GBitmap *s_res_logo, *s_res_clear, *s_res_bt, *s_res_bat, *s_res_batCharge, *s_res_badteam, *s_res_update,
+							 *s_res_ftbl;
+static TextLayer *s_time_layer, *s_date_layer, *s_date2_layer, *s_beat_layer, *s_count1_layer, *s_count2_layer, 
+								 *s_step_layer, *s_td_layer;
+int recon = 1, discon = 3, count = 0, runAnimation = 1, mainWindow = 0, countdown = 4,
+		countdownDEFAULT = 1, countdownAni = 0, random = 0, randombad = 0, randTeam, randTeamBad, gameday, daysince, 
+		daysince2, delay = 1, gametime, gamemin, gamemonth, gameapm, gameyear, height, width, steps, avgSteps, avgPct,
+    sthr = 11, stmin = 0, stampm = 1, edhr = 7, edmin = 0, edampm = 0, autoRange = 20;
+long startQ, endQ, currentQ;
 int team = 0;
 int badteam = 20;
-int version = 250;
-bool btHistory = true, firstTime = true, outdated = false, animationsRunning = false, timeup;
+int version = 300;
+bool btHistory = true, firstTime = true, outdated = false, animationsRunning = false, timeup, premium = false,
+	   healthS = false, healthTD = false, quiet = true, autoAni = true, healthSHistory = false, healthTDHistory = false,
+		 healthWhite;
 static int s_toggle, s_toggle2, s_toggle3;
-
-int count99 = 0;
+uint8_t batteryLevel;
+HealthMetric metric = HealthMetricStepCount;
 
 //Declare animations so that they can be used before they have been defined
 static void beat_animation();
 
 //Use this as a universal destroy animation
-static void destroy_property_animation(PropertyAnimation **layer_animation) {
-  #ifdef PBL_PLATFORM_APLITE
-		if (*layer_animation == NULL) {
-			return;
-		}
+static void destroy_property_animation(PropertyAnimation **layer_animation) {}
 
-		if (animation_is_scheduled((Animation*) *layer_animation)) {
-			animation_unschedule((Animation*) *layer_animation);
-		}
 
-		property_animation_destroy(*layer_animation);
-		*layer_animation = NULL;
-	#endif
+#ifdef PBL_PLATFORM_APLITE
+#else
+static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "inbox_received_callback()");
 }
 
-static void layer_update_proc(Layer *layer, GContext *ctx){
+static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "inbox_dropped_callback()");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "outbox_failed_callback()");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "outbox_sent_callback()");
+}
+
+static bool kiezelpay_event_callback(kiezelpay_event e, void* extra_data) {
+  switch (e) {
+    case KIEZELPAY_ERROR:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(): KIEZELPAY_ERROR");
+      break;
+    case KIEZELPAY_BLUETOOTH_UNAVAILABLE:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(): KIEZELPAY_BLUETOOTH_UNAVAILABLE");
+      break;
+    case KIEZELPAY_INTERNET_UNAVAILABLE:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(): KIEZELPAY_INTERNET_UNAVAILABLE");
+      break;
+#if KIEZELPAY_DISABLE_TIME_TRIAL == 0
+    case KIEZELPAY_TRIAL_STARTED:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(): KIEZELPAY_TRIAL_STARTED");
+      break;
+#endif
+    case KIEZELPAY_TRIAL_ENDED:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(): KIEZELPAY_TRIAL_ENDED");
+      break;
+    case KIEZELPAY_CODE_AVAILABLE:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(): KIEZELPAY_CODE_AVAILABLE");
+      break;
+    case KIEZELPAY_PURCHASE_STARTED:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(): KIEZELPAY_PURCHASE_STARTED");
+      break;
+    case KIEZELPAY_LICENSED:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(): KIEZELPAY_LICENSED");
+      break;
+    default:
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "kiezelpay_event_callback(); unknown event");
+      break;
+  };
+  
+  //return true;   //prevent the kiezelpay lib from showing messages by signaling it that we handled the event ourselves
+  return false;    //let the kiezelpay lib handle the event
+}
+#endif
+
+static void info_update_proc(Layer *layer, GContext *ctx){
 	GRect infoRect = GRect(0, (height / 2) + 34, width, 60);
 	GRect border = GRect(-1, (height / 2) + 33, width + 2, 61);
 	#ifdef PBL_RECT
@@ -57,13 +107,8 @@ static void layer_update_proc(Layer *layer, GContext *ctx){
 	#endif
 }
 
-static void layer_update_proc2(Layer *layer, GContext *ctx){
-	//HERE
-	#ifdef PBL_RECT
-		GRect beatRect = GRect(0, 0, 55, 40);
-	#elif PBL_ROUND
-		GRect beatRect = GRect(63, 0, 55, 40);
-	#endif
+static void beat_update_proc(Layer *layer, GContext *ctx){
+	GRect beatRect = GRect(0, 0, 55, 40);
 	
 	graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, beatRect, 0, 0);
@@ -71,10 +116,71 @@ static void layer_update_proc2(Layer *layer, GContext *ctx){
   graphics_draw_rect(ctx, beatRect);
 }
 
-static void layer_update_proc3(Layer *layer, GContext *ctx){
+static void health_update_procWhite(Layer *layer, GContext *ctx){
+	graphics_context_set_stroke_color(ctx, GColorWhite);
+	for(int x = 0; x < 3; x++){
+		for(int z = 0; z < 2; z++){
+			GPoint leftyBig = GPoint((width / 2) - 70, (height / 2) + (-43 + x * 20 + z));
+			GPoint rightyBig = GPoint((width / 2) - 59, (height / 2) + (-43 + x * 20 + z));
+
+			graphics_draw_line(ctx, leftyBig, rightyBig);
+		}
+		
+		for(int y = 0; y < 5; y++){
+			for(int w = 0; w < 2; w++){
+				GPoint lefty = GPoint((width / 2) - 67, (height / 2) + (-43 + y * 4 + x * 20 + w));
+				GPoint righty = GPoint((width / 2) - 62, (height / 2) + (-43 + y * 4 + x * 20 + w));
+
+				graphics_draw_line(ctx, lefty, righty);
+			}
+		}
+	}
+	for(int v = 0; v < 2; v++){
+		GPoint leftyBigF = GPoint((width / 2) - 70, (height / 2) + (17 + v));
+		GPoint rightyBigF = GPoint((width / 2) - 59, (height / 2) + (17 + v));
+
+		graphics_draw_line(ctx, leftyBigF, rightyBigF);
+	}
+
+}
+
+static void health_update_procBlack(Layer *layer, GContext *ctx){
+	graphics_context_set_stroke_color(ctx, GColorBlack);
+	for(int x = 0; x < 3; x++){
+		for(int z = 0; z < 2; z++){
+			GPoint leftyBig = GPoint((width / 2) - 70, (height / 2) + (-43 + x * 20 + z));
+			GPoint rightyBig = GPoint((width / 2) - 59, (height / 2) + (-43 + x * 20 + z));
+
+			graphics_draw_line(ctx, leftyBig, rightyBig);
+		}
+		
+		for(int y = 0; y < 5; y++){
+			for(int w = 0; w < 2; w++){
+				GPoint lefty = GPoint((width / 2) - 67, (height / 2) + (-43 + y * 4 + x * 20 + w));
+				GPoint righty = GPoint((width / 2) - 62, (height / 2) + (-43 + y * 4 + x * 20 + w));
+
+				graphics_draw_line(ctx, lefty, righty);
+			}
+		}
+	}
+	for(int v = 0; v < 2; v++){
+		GPoint leftyBigF = GPoint((width / 2) - 70, (height / 2) + (17 + v));
+		GPoint rightyBigF = GPoint((width / 2) - 59, (height / 2) + (17 + v));
+
+		graphics_draw_line(ctx, leftyBigF, rightyBigF);
+	}
+
+}
+
+static void badteam_update_proc(Layer *layer, GContext *ctx){
 	GRect badteamRect = GRect(0, 0, height+20, width);
+	//GRect badteamRect = GRect(0, 0, 200, 200);
 	
-	graphics_context_set_fill_color(ctx, (GColor)TEAM_COLORS[badteam]);
+	#ifdef PBL_COLOR
+		graphics_context_set_fill_color(ctx, (GColor)TEAM_COLORS[badteam]);
+	#else
+		graphics_context_set_fill_color(ctx, (GColor)AP_TEAM_COLORS[badteam]);
+	#endif
   graphics_fill_rect(ctx, badteamRect, 0, 0);
 }
 
@@ -120,6 +226,20 @@ static void battery_handler(BatteryChargeState new_state) {
 			bitmap_layer_set_bitmap(bat, s_res_clear);
 		}
 	}
+	
+	//Use this for auto animation set number
+		if(batteryLevel >= autoRange){
+			if(autoAni && currentQ < startQ && currentQ > endQ){
+				APP_LOG(APP_LOG_LEVEL_DEBUG, "Auto: Animations ON %d", autoRange);
+				runAnimation = 1;
+			}
+		}
+		else{
+			if(autoAni){
+				APP_LOG(APP_LOG_LEVEL_DEBUG, "Auto: Animations OFF %d", autoRange);
+				runAnimation = 0;
+			}
+		}
 	
 	layer_mark_dirty(bitmap_layer_get_layer(bat));
 }
@@ -205,11 +325,119 @@ static void tap_handler(AccelAxisType axis, int32_t direction) {
 	}
 }
 
+static void health_handler(time_t starts, time_t ends, int stepper){
+	HealthMetric metric = HealthMetricStepCount;
+	HealthServiceAccessibilityMask mask;
+	//GRect ftblRect = {.origin = {.x = (width / 2) - 70, .y = (height / 2) + 8}, .size = {.w = 12, .h = 12}};
+
+	if(stepper == 0){
+		// Check the metric has data available for today
+		mask = health_service_metric_accessible(metric, starts, ends);
+	}
+	else{
+		mask = health_service_metric_averaged_accessible(metric, starts, ends, HealthServiceTimeScopeDaily);
+	}
+
+	if(mask & HealthServiceAccessibilityMaskAvailable) {
+		// Data is available!
+		if(stepper == 0){
+			static char buffer4[] = "000000";
+			steps = (int)health_service_sum_today(metric);
+			//steps = 88888;
+			APP_LOG(APP_LOG_LEVEL_INFO, "Steps today: %d", steps);
+
+			if(healthS){
+				snprintf(buffer4, sizeof("000000"), "%d", steps);
+				text_layer_set_text(s_step_layer, buffer4);
+			}
+		}
+		else{
+			avgSteps = (int)health_service_sum_averaged(metric, starts, ends, HealthServiceTimeScopeDaily);
+			//avgSteps = 1000;
+			APP_LOG(APP_LOG_LEVEL_INFO, "Average steps: %d", avgSteps);
+		}
+	} 
+	else {
+		// No data recorded yet today
+		APP_LOG(APP_LOG_LEVEL_ERROR, "Data unavailable!");
+	}
+	
+	avgPct = 100 * steps / avgSteps;
+	if(avgPct >= 100){
+		//Layer *ftblLayer_layer = bitmap_layer_get_layer(ftbl);
+		//ftblRect.origin.y = ftblRect.origin.y - 64;
+		//ftblRect = GRect((width / 2) - 70, (height / 2) - 56, 12, 12);
+		//layer_set_frame(ftblLayer_layer, ftblRect);
+		//layer_mark_dirty(bitmap_layer_get_layer(ftbl));
+		
+		if(healthTD){
+			text_layer_set_text(s_td_layer, "T D");
+		}
+		else{
+			text_layer_set_text(s_td_layer, "  ");
+		}
+	}
+	else{
+		//Layer *ftblLayer_layer = bitmap_layer_get_layer(ftbl);
+		//ftblRect.origin.y = ftblRect.origin.y - (avgPct * 64 / 100);
+		//ftblRect = GRect((width / 2) - 70, (height / 2) + 8 - (avgPct * 64 / 100), 12, 12);
+		//layer_set_frame(ftblLayer_layer, ftblRect);
+		//layer_mark_dirty(bitmap_layer_get_layer(ftbl));
+	}
+}
+
 //Update the time
 static void update_time() {
+	
   time_t temp = time(NULL); 
   struct tm *tick_time = localtime(&temp);
   static char buffer1[] = "00:00", buffer2[] = "Jan", buffer3[] = "00";
+	
+	if(quiet){
+		int min = tick_time->tm_min;
+		int hour = tick_time->tm_hour;
+
+		if(stampm == 1){
+			if(sthr < 12){
+				sthr = sthr + 12;
+			}
+		}
+		if(stampm == 0){
+			if(sthr == 12){
+				sthr = 0;
+			}
+		}
+		if(edampm == 1){
+			if(edhr < 12){
+				edhr = edhr + 12;
+			}
+		}
+		if(edampm == 0){
+			if(edhr == 12){
+				edhr = 0;
+			}
+		}
+		if(edampm == 2){
+			if(edhr == 24){
+				edhr = 0;
+			}
+		}
+		
+		startQ = sthr * 100 + stmin;
+		endQ = edhr * 100 + edmin;
+		currentQ = hour * 100 + min;
+		
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "ST %d ED %d CU %d", (int)(startQ), (int)(endQ), (int)(currentQ));
+		
+		if(currentQ > startQ || currentQ < endQ){
+			runAnimation = 0;
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "Quiet Time ON");
+		}
+		if(currentQ < startQ && currentQ > endQ && batteryLevel >= autoRange){
+			runAnimation = 1;
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "Quiet Time OFF");
+		}
+	}
 
 	if(countdown == 1){
 		int wday = tick_time->tm_wday;
@@ -420,18 +648,26 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 	// Show current bluetooth connection state
 	bt_handler(bluetooth_connection_service_peek());
+	
+	#ifdef PBL_HEALTH
+	if(healthS || healthTD){
+		health_handler(time_start_of_today(), time(NULL), 0);
+		if(healthTD){
+			health_handler(time_start_of_today(), time_start_of_today() + (24 * SECONDS_PER_HOUR), 1);
+		}
+	}
+	#endif
 
 	if(firstTime && runAnimation == 1){
-		layer_set_update_proc(s_badteambox_layer, layer_update_proc3);
+		layer_set_update_proc(s_badteambox_layer, badteam_update_proc);
 		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
-		layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
+		layer_set_update_proc(s_beatbox_layer, beat_update_proc);
 		text_layer_set_text(s_beat_layer, "BEAT");
 		tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 		firstTime = false;
 	}
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "GO");
-	beat_animation();
 	
+	//beat_animation();
 }
 
 static void anim_stopped_handler(Animation *animation, bool finished, void *context) {
@@ -457,7 +693,7 @@ static void anim_stopped_handler(Animation *animation, bool finished, void *cont
 				text_layer_set_text(s_count2_layer, "     ");
 				update_time();
 			}
-			if(countdownAni == 2){
+			if(countdownAni == 2 || countdownAni == 0){
 				if(countdown != 4){
 					countdown = 1;
 				}
@@ -470,7 +706,7 @@ static void anim_stopped_handler(Animation *animation, bool finished, void *cont
 //Beat animation
 static void beat_animation() {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "Animate");
-	if(countdownAni == 1){
+	if(countdownAni == 1 || countdownAni == 0){
 		if(countdown != 4){
 			countdown = 1;
 		}
@@ -505,7 +741,7 @@ static void beat_animation() {
 	s_toggle3 = !s_toggle3;
 	destroy_property_animation(&s_badteam_animation);
 	s_badteam_animation = property_animation_create_layer_frame(layer4, NULL, &to_rect3);
-	animation_set_duration((Animation*) s_badteam_animation, 600);
+	animation_set_duration((Animation*) s_badteam_animation, 650);
 	animation_set_curve((Animation*) s_badteam_animation, AnimationCurveEaseOut);
 	animation_set_curve((Animation*) s_badteam_animation, AnimationCurveEaseIn);
 	animation_schedule((Animation*) s_badteam_animation);
@@ -518,14 +754,14 @@ static void beat_animation() {
 	s_toggle = !s_toggle;
 	destroy_property_animation(&s_beat_animation);
 	s_beat_animation = property_animation_create_layer_frame(layer, NULL, &to_rect);
-	animation_set_duration((Animation*) s_beat_animation, 600);
+	animation_set_duration((Animation*) s_beat_animation, 650);
 	animation_set_curve((Animation*) s_beat_animation, AnimationCurveEaseOut);
 	animation_set_curve((Animation*) s_beat_animation, AnimationCurveEaseIn);
 	animation_schedule((Animation*) s_beat_animation);
 
 	destroy_property_animation(&s_beatbox_animation);
 	s_beatbox_animation = property_animation_create_layer_frame(layer2, NULL, &to_rect);
-	animation_set_duration((Animation*) s_beatbox_animation, 600);
+	animation_set_duration((Animation*) s_beatbox_animation, 650);
 	animation_set_curve((Animation*) s_beatbox_animation, AnimationCurveEaseOut);
 	animation_set_curve((Animation*) s_beatbox_animation, AnimationCurveEaseIn);
 	animation_set_handlers((Animation*)s_beatbox_animation, (AnimationHandlers) {
@@ -568,7 +804,12 @@ void animationSetup(){
 	animationsRunning = true;
 }
 
-void setTeam(int x, int who){
+void setTeam(int x, int who, Layer *window_layer){
+	
+	if(s_res_badteam != NULL){
+		gbitmap_destroy(s_res_badteam);
+	}
+	
 	if(x == 143){
 		time_t temp = time(NULL); 
 		struct tm *tick_time = localtime(&temp);
@@ -595,8 +836,48 @@ void setTeam(int x, int who){
 				persist_write_int(PER_RANDOM, random);
 			}
 
-			window_set_background_color(s_window, (GColor)TEAM_COLORS[randTeam]);
+			#ifdef PBL_COLOR
+				window_set_background_color(s_window, (GColor)TEAM_COLORS[randTeam]);
+			#else
+				window_set_background_color(s_window, (GColor)AP_TEAM_COLORS[randTeam]);
+			#endif
+			
+			#ifdef PBL_HEALTH
+				text_layer_destroy(s_td_layer);
+				text_layer_destroy(s_step_layer);
+				s_step_layer = initText((width / 2) - 71, (height / 2) + 18, 110, 28, FONT_KEY_GOTHIC_14_BOLD, s_window);
+				text_layer_set_text(s_step_layer, "      ");
+				text_layer_set_text_alignment(s_step_layer, GTextAlignmentLeft);
+				#ifdef PBL_RECT
+					s_td_layer = initText((width / 2) - 69, (height / 2) - 84, 9, 50, FONT_KEY_GOTHIC_14_BOLD, s_window);
+				#elif PBL_ROUND
+					s_td_layer = initText((width / 2) - 80, (height / 2) - 28, 9, 50, FONT_KEY_GOTHIC_14_BOLD, s_window);
+				#endif
+				text_layer_set_text(s_td_layer, " ");
+				#ifdef PBL_COLOR
+					text_layer_set_text_color(s_td_layer, (GColor)HEALTH_COLORS[randTeam]);
+					text_layer_set_text_color(s_step_layer, (GColor)HEALTH_COLORS[randTeam]);
+				#else
+					text_layer_set_text_color(s_td_layer, (GColor)AP_HEALTH_COLORS[randTeam]);
+					text_layer_set_text_color(s_step_layer, (GColor)AP_HEALTH_COLORS[randTeam]);
+				#endif
+		
+				#ifdef PBL_COLOR
+					healthWhite = gcolor_equal((GColor)HEALTH_COLORS[randTeam], GColorWhite);
+				#else
+					healthWhite = gcolor_equal((GColor)AP_HEALTH_COLORS[randTeam], GColorWhite);
+				#endif
 
+				if(healthWhite && healthTD){
+					layer_set_hidden(s_health_layerWhite, false);
+					layer_set_hidden(s_health_layerBlack, true);
+				}
+				if(!healthWhite && healthTD){
+					layer_set_hidden(s_health_layerBlack, false);
+					layer_set_hidden(s_health_layerWhite, true);
+				}
+			#endif
+			
 			if(s_res_logo != NULL){
 				gbitmap_destroy(s_res_logo);
 			}
@@ -625,7 +906,47 @@ void setTeam(int x, int who){
 				persist_write_int(PER_RANDOMBAD, randombad);
 			}
 
-			window_set_background_color(s_window, (GColor)TEAM_COLORS[randTeamBad]);
+			#ifdef PBL_COLOR
+				window_set_background_color(s_window, (GColor)TEAM_COLORS[randTeamBad]);
+			#else
+				window_set_background_color(s_window, (GColor)AP_TEAM_COLORS[randTeamBad]);
+			#endif
+			
+			#ifdef PBL_HEALTH
+				text_layer_destroy(s_td_layer);
+				text_layer_destroy(s_step_layer);
+				s_step_layer = initText((width / 2) - 71, (height / 2) + 18, 110, 28, FONT_KEY_GOTHIC_14_BOLD, s_window);
+				text_layer_set_text(s_step_layer, "      ");
+				text_layer_set_text_alignment(s_step_layer, GTextAlignmentLeft);
+				#ifdef PBL_RECT
+					s_td_layer = initText((width / 2) - 69, (height / 2) - 84, 9, 50, FONT_KEY_GOTHIC_14_BOLD, s_window);
+				#elif PBL_ROUND
+					s_td_layer = initText((width / 2) - 80, (height / 2) - 28, 9, 50, FONT_KEY_GOTHIC_14_BOLD, s_window);
+				#endif
+				text_layer_set_text(s_td_layer, " ");
+				#ifdef PBL_COLOR
+					text_layer_set_text_color(s_td_layer, (GColor)HEALTH_COLORS[randTeamBad]);
+					text_layer_set_text_color(s_step_layer, (GColor)HEALTH_COLORS[randTeamBad]);
+				#else
+					text_layer_set_text_color(s_td_layer, (GColor)AP_HEALTH_COLORS[randTeamBad]);
+					text_layer_set_text_color(s_step_layer, (GColor)AP_HEALTH_COLORS[randTeamBad]);
+				#endif
+		
+				#ifdef PBL_COLOR
+					healthWhite = gcolor_equal((GColor)HEALTH_COLORS[randTeamBad], GColorWhite);
+				#else
+					healthWhite = gcolor_equal((GColor)AP_HEALTH_COLORS[randTeamBad], GColorWhite);
+				#endif
+
+				if(healthWhite && healthTD){
+					layer_set_hidden(s_health_layerWhite, false);
+					layer_set_hidden(s_health_layerBlack, true);
+				}
+				if(!healthWhite && healthTD){
+					layer_set_hidden(s_health_layerBlack, false);
+					layer_set_hidden(s_health_layerWhite, true);
+				}
+			#endif
 
 			if(s_res_logo != NULL){
 				gbitmap_destroy(s_res_logo);
@@ -637,15 +958,67 @@ void setTeam(int x, int who){
 
 	}
 	else{
-		window_set_background_color(s_window, (GColor)TEAM_COLORS[x]);
+		#ifdef PBL_COLOR
+			window_set_background_color(s_window, (GColor)TEAM_COLORS[x]);
+		#else
+			window_set_background_color(s_window, (GColor)AP_TEAM_COLORS[x]);
+		#endif
 
 		if(s_res_logo != NULL){
 			gbitmap_destroy(s_res_logo);
 		}
+		
 		s_res_logo = gbitmap_create_with_resource(TEAM_ICON[x]);
 		bitmap_layer_set_bitmap(logo, s_res_logo);
 		layer_mark_dirty(bitmap_layer_get_layer(logo));
+		
+		#ifdef PBL_HEALTH
+			text_layer_destroy(s_td_layer);
+			text_layer_destroy(s_step_layer);
+			s_step_layer = initText((width / 2) - 71, (height / 2) + 18, 110, 28, FONT_KEY_GOTHIC_14_BOLD, s_window);
+			text_layer_set_text(s_step_layer, "      ");
+			text_layer_set_text_alignment(s_step_layer, GTextAlignmentLeft);
+			#ifdef PBL_RECT
+				s_td_layer = initText((width / 2) - 69, (height / 2) - 84, 9, 50, FONT_KEY_GOTHIC_14_BOLD, s_window);
+			#elif PBL_ROUND
+				s_td_layer = initText((width / 2) - 80, (height / 2) - 28, 9, 50, FONT_KEY_GOTHIC_14_BOLD, s_window);
+			#endif
+			text_layer_set_text(s_td_layer, " ");
+		
+			#ifdef PBL_COLOR
+				text_layer_set_text_color(s_td_layer, (GColor)HEALTH_COLORS[x]);
+				text_layer_set_text_color(s_step_layer, (GColor)HEALTH_COLORS[x]);
+			#else
+				text_layer_set_text_color(s_td_layer, (GColor)AP_HEALTH_COLORS[x]);
+				text_layer_set_text_color(s_step_layer, (GColor)AP_HEALTH_COLORS[x]);
+			#endif
+		
+			#ifdef PBL_COLOR
+				healthWhite = gcolor_equal((GColor)HEALTH_COLORS[x], GColorWhite);
+			#else
+				healthWhite = gcolor_equal((GColor)AP_HEALTH_COLORS[x], GColorWhite);
+			#endif
+
+			if(healthWhite && healthTD){
+				layer_set_hidden(s_health_layerWhite, false);
+				layer_set_hidden(s_health_layerBlack, true);
+			}
+			if(!healthWhite && healthTD){
+				layer_set_hidden(s_health_layerBlack, false);
+				layer_set_hidden(s_health_layerWhite, true);
+			}
+		
+		#endif
 	}
+	
+	#ifdef PBL_HEALTH
+		if(healthS || healthTD){
+			health_handler(time_start_of_today(), time(NULL), 0);
+			if(healthTD){
+				health_handler(time_start_of_today(), time_start_of_today() + (24 * SECONDS_PER_HOUR), 1);
+			}
+		}
+	#endif
 }
 
 void setbadTeam(int x){
@@ -673,11 +1046,8 @@ void setbadTeam(int x){
 			persist_write_int(PER_DAYSINCE2, 7);
 			persist_write_int(PER_RANDOMBAD, randombad);
 		}
-
-		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
-
-		if(s_res_logo != NULL){
-			gbitmap_destroy(s_res_badteam);
+		if(s_res_badteam != NULL){
+			//gbitmap_destroy(s_res_badteam);
 		}
 		s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[randTeamBad]);
 		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
@@ -685,10 +1055,8 @@ void setbadTeam(int x){
 
 	}
 	else{
-		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
-
-		if(s_res_logo != NULL){
-			gbitmap_destroy(s_res_badteam);
+		if(s_res_badteam != NULL){
+			//gbitmap_destroy(s_res_badteam);
 		}
 		s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[x]);
 		bitmap_layer_set_bitmap(beatteam, s_res_badteam);
@@ -707,12 +1075,27 @@ void process_tuple(Tuple *t){
 		case KEY_ANIMATION:
 		if(value == 0){
 			persist_write_int(PER_ANIMATION, 1);
+			persist_write_bool(PER_AUTOANIMATION, false);
 			runAnimation = 1;
+			autoAni = false;
 		}
 		else if(value == 1){
 			persist_write_int(PER_ANIMATION, 0);
+			persist_write_bool(PER_AUTOANIMATION, false);
 			runAnimation = 0;
+			autoAni = false;
 		}
+		else if(value ==2){
+			persist_write_int(PER_ANIMATION, 1);
+			persist_write_bool(PER_AUTOANIMATION, true);
+			runAnimation = 1;
+			autoAni = true;
+		}
+		break;
+		//Auto Animation range
+		case KEY_AUTORANGE:
+		autoRange = value;
+		persist_write_int(PER_AUTORANGE, value);
 		break;
 		//Bluetooth disconnect vibrations
 		case KEY_DISCONNECT:
@@ -769,10 +1152,16 @@ void process_tuple(Tuple *t){
 		break;
 		case KEY_TEAM:
 		team = value;
+		if(team == 143){
+			premium = true;
+		}
 		persist_write_int(PER_TEAM, team);
 		break;
 		case KEY_BADTEAM:
 		badteam = value;
+		if(team == 143){
+			premium = true;
+		}
 		persist_write_int(PER_BADTEAM, badteam);
 		break;
 		case KEY_WINDOW:
@@ -782,11 +1171,12 @@ void process_tuple(Tuple *t){
 		case KEY_COUNTDOWN:
 		if(value == 0){
 			countdown = 4;
-			persist_write_int(PER_COUNTDOWN, 0);
+			persist_write_int(PER_COUNTDOWN, 4);
 			text_layer_set_text(s_count1_layer, "     ");
 			text_layer_set_text(s_count2_layer, "     ");
 		}
 		else{
+			premium = true;
 			if(countdownAni == 0 || countdownAni == 2){
 				countdown = 1;
 				persist_write_int(PER_COUNTDOWN, 1);
@@ -809,10 +1199,10 @@ void process_tuple(Tuple *t){
 		else if(value == 1){
 			countdownAni = 1;
 			if(countdown != 4){
-				countdown = 0;
+				countdown = 0;				
+				persist_write_int(PER_COUNTDOWN, 0);
 			}
 			persist_write_int(PER_COUNTDOWNANI, 1);
-			persist_write_int(PER_COUNTDOWN, 0);
 			text_layer_set_text(s_count1_layer, "     ");
 			text_layer_set_text(s_count2_layer, "     ");
 		}
@@ -820,9 +1210,9 @@ void process_tuple(Tuple *t){
 			countdownAni = 2;
 			if(countdown != 4){
 				countdown = 1;
+				persist_write_int(PER_COUNTDOWN, 1);
 			}
 			persist_write_int(PER_COUNTDOWNANI, 2);
-			persist_write_int(PER_COUNTDOWN, 1);
 		}
 		break;
 		case KEY_GAMEDAY:
@@ -853,7 +1243,84 @@ void process_tuple(Tuple *t){
 		gameyear = value;
 		persist_write_int(PER_GAMEYEAR, gameyear);
 		break;
-  }
+		case KEY_QUIET:
+		if(value == 0){
+			quiet = true;
+			persist_write_bool(PER_QUIET, true);
+		}
+		else{
+			quiet = false;
+			persist_write_bool(PER_QUIET, false);
+		}
+		break;
+		case KEY_STHR:
+		sthr = value;
+		persist_write_int(PER_STHR, value);
+		break;
+		case KEY_STMIN:
+		stmin = value;
+		persist_write_int(PER_STMIN, value);
+		break;
+		case KEY_STAMPM:
+		stampm = value;
+		persist_write_int(PER_STAMPM, value);
+		break;
+		case KEY_EDHR:
+		edhr = value;
+		persist_write_int(PER_EDHR, value);
+		break;
+		case KEY_EDMIN:
+		edmin = value;
+		persist_write_int(PER_EDMIN, value);
+		break;
+		case KEY_EDAMPM:
+		edampm = value;
+		persist_write_int(PER_EDAMPM, value);
+		break;
+		//Health stuff
+		case KEY_STEPS:
+		if(value == 0){
+			persist_write_bool(PER_STEPS, false);
+			healthS = false;
+			if(healthSHistory){
+				text_layer_set_text(s_step_layer, "      ");
+				healthSHistory = false;
+			}
+		}
+		else if(value == 1){
+			persist_write_bool(PER_STEPS, true);
+			healthS = true;
+			premium = true;
+			if(!healthSHistory){
+				health_handler(time_start_of_today(), time(NULL), 0);
+				healthSHistory = true;
+			}
+		}
+		break;
+		case KEY_TD:
+		if(value == 0){
+			persist_write_bool(PER_TD, false);
+			healthTD = false;
+			if(healthTDHistory){
+				bitmap_layer_set_bitmap(ftbl, s_res_clear);
+				layer_mark_dirty(bitmap_layer_get_layer(ftbl));
+				layer_set_hidden(s_health_layerWhite, true);
+				layer_set_hidden(s_health_layerBlack, true);
+				healthTDHistory = false;
+			}
+		}
+		else if(value == 1){
+			persist_write_bool(PER_TD, true);
+			healthTD = true;
+			premium = true;
+			if(!healthTDHistory){
+				bitmap_layer_set_bitmap(ftbl, s_res_ftbl);
+				layer_mark_dirty(bitmap_layer_get_layer(ftbl));
+				healthTDHistory = true;
+			}
+		}
+		break;
+	}
 	
 }
 
@@ -876,6 +1343,46 @@ void inbox(DictionaryIterator *iter, void *context){
     }
   }
 	
+	if(premium == true){
+		#ifdef PBL_PLATFORM_APLITE
+		#else
+			kiezelpay_start_purchase();
+		#endif
+		int32_t result = kiezelpay_get_status();
+		bool paid = true;
+		if(result & KIEZELPAY_LICENSED){
+			paid = true;
+		APP_LOG(APP_LOG_LEVEL_INFO, "Paid");
+		}
+		else{
+			paid = false;
+		APP_LOG(APP_LOG_LEVEL_INFO, "Not");
+		}
+		if(!paid){
+			countdown = 4;
+			persist_write_int(PER_COUNTDOWN, 4);
+			badteam = 20;
+			persist_write_int(PER_BADTEAM, badteam);
+			team = 0;
+			persist_write_int(PER_TEAM, team);
+			persist_write_bool(PER_TD, false);
+			healthTD = false;
+			if(healthTDHistory){
+				bitmap_layer_set_bitmap(ftbl, s_res_clear);
+				layer_mark_dirty(bitmap_layer_get_layer(ftbl));
+				layer_set_hidden(s_health_layerWhite, true);
+				layer_set_hidden(s_health_layerBlack, true);
+				healthTDHistory = false;
+			}
+			persist_write_bool(PER_STEPS, false);
+			healthS = false;
+			if(healthSHistory){
+				text_layer_set_text(s_step_layer, "      ");
+				healthSHistory = false;
+			}
+		}
+	}
+	
 	if(mainWindow == 0){
 		if(s_beat_layer != NULL){
 			text_layer_destroy(s_beat_layer);
@@ -883,7 +1390,7 @@ void inbox(DictionaryIterator *iter, void *context){
 		}
 		
 		if(!outdated){
-			setTeam(team, 0);
+			setTeam(team, 0, window_layer);
 		}
 
 		if(runAnimation == 1){
@@ -897,7 +1404,7 @@ void inbox(DictionaryIterator *iter, void *context){
 				#elif PBL_ROUND
 					s_beatbox_layer = layer_create(GRect(63, 0, 55, 40));
 				#endif
-				layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
+				layer_set_update_proc(s_beatbox_layer, beat_update_proc);
 				layer_add_child(window_layer, s_beatbox_layer);
 				#ifdef PBL_RECT
 					GRect to_rect = GRect(0, -40, 55, 40);
@@ -921,7 +1428,7 @@ void inbox(DictionaryIterator *iter, void *context){
 	}
 	else{
 		if(!outdated){
-			setTeam(badteam, 1);
+			setTeam(badteam, 1, window_layer);
 		}
 		//HERE
 		runAnimation = 0;
@@ -930,7 +1437,7 @@ void inbox(DictionaryIterator *iter, void *context){
 		#elif PBL_ROUND
 			s_beatbox_layer = layer_create(GRect(63, 0, 55, 40));
 		#endif
-		layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
+		layer_set_update_proc(s_beatbox_layer, beat_update_proc);
 		layer_add_child(window_layer, s_beatbox_layer);
 		#ifdef PBL_RECT
 			s_beat_layer = initText(0, 0, 55, 40, FONT_KEY_GOTHIC_28_BOLD, s_window);
@@ -939,43 +1446,46 @@ void inbox(DictionaryIterator *iter, void *context){
 		#endif
 		text_layer_set_text(s_beat_layer, "BEAT");
 	}
+
 	
 	update_time();
 	
 }
 
 static void main_window_load(Window *window) {
+	
 	Layer *window_layer = window_get_root_layer(window);
+  GRect window_bounds = layer_get_bounds(window_layer);
+	GRect layer_bounds = window_bounds;
 
-	//Not sure if I need this or not, but I'm going to keep it here in case
-	#ifndef PBL_SDK_3
-    window_set_fullscreen(s_window, true);
-	#endif
-  
-  #ifdef PBL_RECT
-		height = 168;
-		width = 144;
-	#elif PBL_ROUND
-		height = 180;
-		width = 180;
-	#endif
+	height = layer_bounds.size.h;
+	width = layer_bounds.size.w;
+	
+	#ifdef PBL_HEALTH	
+		s_health_layerWhite = layer_create(GRect(0, 0, width/5, height*2/3));
+		layer_add_child(window_layer, s_health_layerWhite);
+		layer_set_update_proc(s_health_layerWhite, health_update_procWhite);
+		layer_set_hidden(s_health_layerWhite, true);
 
+		s_health_layerBlack = layer_create(GRect(0, 0, width/5, height*2/3));
+		layer_add_child(window_layer, s_health_layerBlack);
+		layer_set_update_proc(s_health_layerBlack, health_update_procBlack);
+		layer_set_hidden(s_health_layerBlack, true);
+	#endif
+	
 	logo = initBitmap((width / 2) - 56, (height / 2) - 81, 115, 115, s_res_clear, s_window);
 	
-	s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[badteam]);
-	
 	if(mainWindow == 0){
-		setTeam(team, 0);
+		setTeam(team, 0, window_layer);
 	}
 	else{
-		setTeam(badteam, 1);
-		//HERE
+		setTeam(badteam, 1, window_layer);
 		#ifdef PBL_RECT
 			s_beatbox_layer = layer_create(GRect(0, 0, 55, 40));
 		#elif PBL_ROUND
 			s_beatbox_layer = layer_create(GRect(63, 0, 55, 40));
 		#endif
-		layer_set_update_proc(s_beatbox_layer, layer_update_proc2);
+		layer_set_update_proc(s_beatbox_layer, beat_update_proc);
 		layer_add_child(window_layer, s_beatbox_layer);
 		
 		#ifdef PBL_RECT
@@ -987,13 +1497,27 @@ static void main_window_load(Window *window) {
 		runAnimation = 0;
 	}
 	
+	s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[badteam]);
+	
+	#ifdef PBL_HEALTH
+		s_res_ftbl = gbitmap_create_with_resource(RESOURCE_ID_ftbl);
+		ftbl = initBitmap((width / 2) - 70, (height / 2) + 8, 12, 12, s_res_clear, s_window);
+		if(healthS){
+			healthSHistory = true;
+		}
+		if(healthTD){
+			bitmap_layer_set_bitmap(ftbl, s_res_ftbl);
+			layer_mark_dirty(bitmap_layer_get_layer(ftbl));
+		}
+	#endif
+	
 	if(runAnimation == 1){		
 		animationSetup();
 	}
 				
 	// Create Layer that the path will be drawn on
   s_info_layer = layer_create(GRect(0, 0, width, height));
-  layer_set_update_proc(s_info_layer, layer_update_proc);
+  layer_set_update_proc(s_info_layer, info_update_proc);
   layer_add_child(window_layer, s_info_layer);
 	
 	#ifdef PBL_RECT
@@ -1040,6 +1564,15 @@ static void main_window_load(Window *window) {
 	
 	// Show current bluetooth connection state
   bt_handler(bluetooth_connection_service_peek());
+	
+	#ifdef PBL_HEALTH
+	if(healthS || healthTD){
+		health_handler(time_start_of_today(), time(NULL), 0);
+		if(healthTD){
+			health_handler(time_start_of_today(), time_start_of_today() + (24 * SECONDS_PER_HOUR), 1);
+		}
+	}
+	#endif
 }
 
 static void main_window_unload(Window *window) {
@@ -1052,7 +1585,21 @@ static void main_window_unload(Window *window) {
 	gbitmap_destroy(s_res_bt);
 	gbitmap_destroy(s_res_bat);
 	gbitmap_destroy(s_res_batCharge);
-	gbitmap_destroy(s_res_badteam);
+	if(s_res_badteam != NULL){
+		gbitmap_destroy(s_res_badteam);
+	}
+	gbitmap_destroy(s_res_clear);
+	
+	#ifdef PBL_HEALTH
+		if(s_res_ftbl != NULL){
+			gbitmap_destroy(s_res_ftbl);
+		}
+		bitmap_layer_destroy(ftbl);
+		text_layer_destroy(s_td_layer);
+		text_layer_destroy(s_step_layer);
+		layer_destroy(s_health_layerBlack);
+		layer_destroy(s_health_layerWhite);
+	#endif
 	
 	text_layer_destroy(s_time_layer);
 	text_layer_destroy(s_date_layer);
@@ -1093,7 +1640,7 @@ static void init() {
 	
 		//Load any persistant data from before watch close
 	if(persist_exists(PER_ANIMATION)){
-		runAnimation = persist_read_bool(PER_ANIMATION);
+		runAnimation = persist_read_int(PER_ANIMATION);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 1: %d", runAnimation);
 	}
 	if(persist_exists(PER_DISCONNECT)){
@@ -1180,6 +1727,50 @@ static void init() {
 		daysince2 = persist_read_int(PER_DAYSINCE2);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 22: %d", daysince2);
 	}
+	if(persist_exists(PER_QUIET)){
+		quiet = persist_read_bool(PER_QUIET);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 23: %d", quiet);
+	}
+	if(persist_exists(PER_STHR)){
+		sthr = persist_read_int(PER_STHR);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 24: %d", sthr);
+	}
+	if(persist_exists(PER_STMIN)){
+		stmin = persist_read_int(PER_STMIN);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 25: %d", stmin);
+	}
+	if(persist_exists(PER_STAMPM)){
+		stampm = persist_read_int(PER_STAMPM);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 26: %d", stampm);
+	}
+	if(persist_exists(PER_EDHR)){
+		edhr = persist_read_int(PER_EDHR);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 27: %d", edhr);
+	}
+	if(persist_exists(PER_EDMIN)){
+		edmin = persist_read_int(PER_EDMIN);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 28: %d", edmin);
+	}
+	if(persist_exists(PER_EDAMPM)){
+		edampm = persist_read_int(PER_EDAMPM);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 29: %d", edampm);
+	}
+	if(persist_exists(PER_AUTORANGE)){
+		autoRange = persist_read_int(PER_AUTORANGE);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 30: %d", autoRange);
+	}	
+	if(persist_exists(PER_AUTOANIMATION)){
+		autoAni = persist_read_bool(PER_AUTOANIMATION);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 31: %d", autoAni);
+	}
+	if(persist_exists(PER_STEPS)){
+		healthS = persist_read_bool(PER_STEPS);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 32: %d", healthS);
+	}	
+	if(persist_exists(PER_TD)){
+		healthTD = persist_read_bool(PER_TD);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Got 33: %d", healthTD);
+	}
 
 	// Show the Window on the watch, with animated=true
   window_stack_push(s_window, true);
@@ -1195,7 +1786,7 @@ static void init() {
 	
 	if(firstTime && runAnimation == 1){
 		// Register with TickTimerService as seconds initially
-		//tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+		tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Seconds Set");
 	}
 	else{
@@ -1203,23 +1794,49 @@ static void init() {
 		tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Minutes Set");
 	}
+
+	// Define custom message size, if more than default defined by KiezelPay
+	
+	#ifdef PBL_PLATFORM_APLITE
+	#else
+	kiezelpay_settings.messaging_inbox_size = 1024;  // default 84
+	kiezelpay_settings.messaging_outbox_size = 1024; // default 45
+
+	// Listen for AppMessages
+	kiezelpay_settings.on_inbox_received = inbox_received_callback;
+	kiezelpay_settings.on_inbox_dropped = inbox_dropped_callback;
+	kiezelpay_settings.on_outbox_failed = outbox_failed_callback;
+	kiezelpay_settings.on_outbox_sent = outbox_sent_callback;
+
+	// Listen for KiezelPay events
+	kiezelpay_settings.on_kiezelpay_event = kiezelpay_event_callback;
+	
+	// Subscribe to Kiezel Pay
+	kiezelpay_init();
+	#endif
+	
 	
 	// Subscribe to js data
 	app_message_register_inbox_received(inbox);
-  app_message_open(250, 32);//app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  app_message_open(200, 32);//app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 }
 
 static void deinit() {
-	// Stop any animations that are going
+	//Stop any animations that are going
 	animation_unschedule_all();
-	// Turn off accelorator services
+	//Turn off accelorator services
 	accel_tap_service_unsubscribe();
 	//Turn off battery peek
 	battery_state_service_unsubscribe();
-	// Turn off bluetooth peek
+	//Turn off bluetooth peek
 	bluetooth_connection_service_unsubscribe();
 	//Turn off time peek
 	tick_timer_service_unsubscribe();
+	//Turn off KiezelPay
+	#ifdef PBL_PLATFORM_APLITE
+	#else
+	kiezelpay_deinit();
+	#endif
 	// Destroy Window
   window_destroy(s_window);
 }
