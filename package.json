@@ -1320,9 +1320,7 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "aplite",
-            "basalt",
-            "chalk"
+            "basalt"
         ],
         "uuid": "0290cf07-cc80-4d74-9467-1dde369f7350",
         "watchapp": {

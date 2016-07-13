@@ -328,7 +328,6 @@ static void tap_handler(AccelAxisType axis, int32_t direction) {
 static void health_handler(time_t starts, time_t ends, int stepper){
 	HealthMetric metric = HealthMetricStepCount;
 	HealthServiceAccessibilityMask mask;
-	//GRect ftblRect = {.origin = {.x = (width / 2) - 70, .y = (height / 2) + 8}, .size = {.w = 12, .h = 12}};
 
 	if(stepper == 0){
 		// Check the metric has data available for today
@@ -355,35 +354,47 @@ static void health_handler(time_t starts, time_t ends, int stepper){
 			avgSteps = (int)health_service_sum_averaged(metric, starts, ends, HealthServiceTimeScopeDaily);
 			//avgSteps = 1000;
 			APP_LOG(APP_LOG_LEVEL_INFO, "Average steps: %d", avgSteps);
+			
+			
+			GRect ftblRect = {.origin = {.x = (width / 2) - 70, .y = (height / 2) + 8}, .size = {.w = 12, .h = 12}};
+			
+			APP_LOG(APP_LOG_LEVEL_INFO, "X: %d", ftblRect.origin.x);
+			APP_LOG(APP_LOG_LEVEL_INFO, "Y: %d", ftblRect.origin.y);
+			APP_LOG(APP_LOG_LEVEL_INFO, "H: %d", ftblRect.size.w);
+			APP_LOG(APP_LOG_LEVEL_INFO, "W: %d", ftblRect.size.h);
+			Layer *ftblLayer_layer = bitmap_layer_get_layer(ftbl);
+			avgPct = 100 * steps / avgSteps;
+			if(avgPct >= 100){
+				ftblRect.origin.y = ftblRect.origin.y - 64;
+				//ftblRect = GRect((width / 2) - 70, (height / 2) - 56, 12, 12);
+
+				if(healthTD){
+					text_layer_set_text(s_td_layer, "T D");
+				}
+				else{
+					text_layer_set_text(s_td_layer, "  ");
+				}
+			}
+			else{
+				ftblRect.origin.y = ftblRect.origin.y - (avgPct * 64 / 100);
+				//ftblRect = GRect((width / 2) - 70, (height / 2) + 8 - (avgPct * 64 / 100), 12, 12);
+				text_layer_set_text(s_td_layer, "  ");
+			}
+
+			APP_LOG(APP_LOG_LEVEL_INFO, "Avg PCT: %d", avgPct);
+			APP_LOG(APP_LOG_LEVEL_INFO, "X: %d", ftblRect.origin.x);
+			APP_LOG(APP_LOG_LEVEL_INFO, "Y: %d", ftblRect.origin.y);
+			APP_LOG(APP_LOG_LEVEL_INFO, "H: %d", ftblRect.size.w);
+			APP_LOG(APP_LOG_LEVEL_INFO, "W: %d", ftblRect.size.h);
+			layer_set_frame(ftblLayer_layer, ftblRect);
+			APP_LOG(APP_LOG_LEVEL_INFO, "Got Passed Layer_SET_Frame");
+			layer_mark_dirty(bitmap_layer_get_layer(ftbl));
 		}
 	} 
 	else {
 		// No data recorded yet today
 		APP_LOG(APP_LOG_LEVEL_ERROR, "Data unavailable!");
-	}
-	
-	avgPct = 100 * steps / avgSteps;
-	if(avgPct >= 100){
-		//Layer *ftblLayer_layer = bitmap_layer_get_layer(ftbl);
-		//ftblRect.origin.y = ftblRect.origin.y - 64;
-		//ftblRect = GRect((width / 2) - 70, (height / 2) - 56, 12, 12);
-		//layer_set_frame(ftblLayer_layer, ftblRect);
-		//layer_mark_dirty(bitmap_layer_get_layer(ftbl));
-		
-		if(healthTD){
-			text_layer_set_text(s_td_layer, "T D");
-		}
-		else{
-			text_layer_set_text(s_td_layer, "  ");
-		}
-	}
-	else{
-		//Layer *ftblLayer_layer = bitmap_layer_get_layer(ftbl);
-		//ftblRect.origin.y = ftblRect.origin.y - (avgPct * 64 / 100);
-		//ftblRect = GRect((width / 2) - 70, (height / 2) + 8 - (avgPct * 64 / 100), 12, 12);
-		//layer_set_frame(ftblLayer_layer, ftblRect);
-		//layer_mark_dirty(bitmap_layer_get_layer(ftbl));
-	}
+	}	
 }
 
 //Update the time
@@ -1346,7 +1357,7 @@ void inbox(DictionaryIterator *iter, void *context){
 	if(premium == true){
 		#ifdef PBL_PLATFORM_APLITE
 		#else
-			kiezelpay_start_purchase();
+			//kiezelpay_start_purchase();
 		#endif
 		int32_t result = kiezelpay_get_status();
 		bool paid = true;
@@ -1355,8 +1366,8 @@ void inbox(DictionaryIterator *iter, void *context){
 		APP_LOG(APP_LOG_LEVEL_INFO, "Paid");
 		}
 		else{
-			paid = false;
-		APP_LOG(APP_LOG_LEVEL_INFO, "Not");
+			//paid = false;
+		APP_LOG(APP_LOG_LEVEL_INFO, "Not Paid");
 		}
 		if(!paid){
 			countdown = 4;
