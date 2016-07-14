@@ -44,9 +44,10 @@ Pebble.addEventListener("ready",
 
 Pebble.addEventListener("showConfiguration",
   function(e) {
+		var info;
 		if (Pebble.getActiveWatchInfo) {
 			// Available.
-			var info = Pebble.getActiveWatchInfo();
+			info = Pebble.getActiveWatchInfo();
 
 			console.log('Pebble model: ' + info.platform);
 		} 

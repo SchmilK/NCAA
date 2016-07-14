@@ -12,7 +12,7 @@
             "health"
         ],
         "displayName": "NCAA FBS Watchface",
-        "enableMultiJS": false,
+        "enableMultiJS": true,
         "messageKeys": {
             "KEY_ANIMATION": 0,
             "KEY_AUTORANGE": 17,
