@@ -1,3 +1,6 @@
+#include <pebble.h>
+#include <pebble-events/pebble-events.h>
+#include "kiezelpay.h"
 #include <main.h>
 	
 static Window *s_window;
@@ -32,6 +35,7 @@ static void destroy_property_animation(PropertyAnimation **layer_animation) {}
 
 #ifdef PBL_PLATFORM_APLITE
 #else
+
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "inbox_received_callback()");
 }
@@ -84,6 +88,7 @@ static bool kiezelpay_event_callback(kiezelpay_event e, void* extra_data) {
   //return true;   //prevent the kiezelpay lib from showing messages by signaling it that we handled the event ourselves
   return false;    //let the kiezelpay lib handle the event
 }
+
 #endif
 
 static void info_update_proc(Layer *layer, GContext *ctx){
@@ -358,10 +363,6 @@ static void health_handler(time_t starts, time_t ends, int stepper){
 			
 			GRect ftblRect = {.origin = {.x = (width / 2) - 70, .y = (height / 2) + 8}, .size = {.w = 12, .h = 12}};
 			
-			APP_LOG(APP_LOG_LEVEL_INFO, "X: %d", ftblRect.origin.x);
-			APP_LOG(APP_LOG_LEVEL_INFO, "Y: %d", ftblRect.origin.y);
-			APP_LOG(APP_LOG_LEVEL_INFO, "H: %d", ftblRect.size.w);
-			APP_LOG(APP_LOG_LEVEL_INFO, "W: %d", ftblRect.size.h);
 			Layer *ftblLayer_layer = bitmap_layer_get_layer(ftbl);
 			avgPct = 100 * steps / avgSteps;
 			if(avgPct >= 100){
@@ -381,13 +382,7 @@ static void health_handler(time_t starts, time_t ends, int stepper){
 				text_layer_set_text(s_td_layer, "  ");
 			}
 
-			APP_LOG(APP_LOG_LEVEL_INFO, "Avg PCT: %d", avgPct);
-			APP_LOG(APP_LOG_LEVEL_INFO, "X: %d", ftblRect.origin.x);
-			APP_LOG(APP_LOG_LEVEL_INFO, "Y: %d", ftblRect.origin.y);
-			APP_LOG(APP_LOG_LEVEL_INFO, "H: %d", ftblRect.size.w);
-			APP_LOG(APP_LOG_LEVEL_INFO, "W: %d", ftblRect.size.h);
 			layer_set_frame(ftblLayer_layer, ftblRect);
-			APP_LOG(APP_LOG_LEVEL_INFO, "Got Passed Layer_SET_Frame");
 			layer_mark_dirty(bitmap_layer_get_layer(ftbl));
 		}
 	} 
@@ -1357,7 +1352,7 @@ void inbox(DictionaryIterator *iter, void *context){
 	if(premium == true){
 		#ifdef PBL_PLATFORM_APLITE
 		#else
-			//kiezelpay_start_purchase();
+			kiezelpay_start_purchase();
 		#endif
 		int32_t result = kiezelpay_get_status();
 		bool paid = true;
@@ -1472,6 +1467,8 @@ static void main_window_load(Window *window) {
 	height = layer_bounds.size.h;
 	width = layer_bounds.size.w;
 	
+	s_res_clear = NULL;
+	
 	#ifdef PBL_HEALTH	
 		s_health_layerWhite = layer_create(GRect(0, 0, width/5, height*2/3));
 		layer_add_child(window_layer, s_health_layerWhite);
@@ -1485,6 +1482,19 @@ static void main_window_load(Window *window) {
 	#endif
 	
 	logo = initBitmap((width / 2) - 56, (height / 2) - 81, 115, 115, s_res_clear, s_window);
+	
+	
+	#ifdef PBL_HEALTH
+		s_res_ftbl = gbitmap_create_with_resource(RESOURCE_ID_ftbl);
+		ftbl = initBitmap((width / 2) - 70, (height / 2) + 8, 12, 12, s_res_clear, s_window);
+		if(healthS){
+			healthSHistory = true;
+		}
+		if(healthTD){
+			bitmap_layer_set_bitmap(ftbl, s_res_ftbl);
+			layer_mark_dirty(bitmap_layer_get_layer(ftbl));
+		}
+	#endif
 	
 	if(mainWindow == 0){
 		setTeam(team, 0, window_layer);
@@ -1509,18 +1519,6 @@ static void main_window_load(Window *window) {
 	}
 	
 	s_res_badteam = gbitmap_create_with_resource(TEAM_ICON[badteam]);
-	
-	#ifdef PBL_HEALTH
-		s_res_ftbl = gbitmap_create_with_resource(RESOURCE_ID_ftbl);
-		ftbl = initBitmap((width / 2) - 70, (height / 2) + 8, 12, 12, s_res_clear, s_window);
-		if(healthS){
-			healthSHistory = true;
-		}
-		if(healthTD){
-			bitmap_layer_set_bitmap(ftbl, s_res_ftbl);
-			layer_mark_dirty(bitmap_layer_get_layer(ftbl));
-		}
-	#endif
 	
 	if(runAnimation == 1){		
 		animationSetup();
@@ -1805,31 +1803,29 @@ static void init() {
 		tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "Minutes Set");
 	}
-
-	// Define custom message size, if more than default defined by KiezelPay
-	
-	#ifdef PBL_PLATFORM_APLITE
-	#else
-	kiezelpay_settings.messaging_inbox_size = 1024;  // default 84
-	kiezelpay_settings.messaging_outbox_size = 1024; // default 45
-
-	// Listen for AppMessages
-	kiezelpay_settings.on_inbox_received = inbox_received_callback;
-	kiezelpay_settings.on_inbox_dropped = inbox_dropped_callback;
-	kiezelpay_settings.on_outbox_failed = outbox_failed_callback;
-	kiezelpay_settings.on_outbox_sent = outbox_sent_callback;
-
-	// Listen for KiezelPay events
-	kiezelpay_settings.on_kiezelpay_event = kiezelpay_event_callback;
-	
-	// Subscribe to Kiezel Pay
-	kiezelpay_init();
-	#endif
-	
 	
 	// Subscribe to js data
 	app_message_register_inbox_received(inbox);
   app_message_open(200, 32);//app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+	
+	#ifdef PBL_PLATFORM_APLITE
+	#else
+  // Listen for KiezelPay events
+  kiezelpay_set_event_handler(kiezelpay_event_callback);
+
+  // Initiate KiezelPay
+  kiezelpay_init();
+  
+  // The pebble-events package is used for appmessages, check https://www.npmjs.com/package/pebble-events on how to receive your own appmessages as well
+  events_app_message_open();
+
+	// Configure your own AppMessage settings for the pebble-events package if you also need app messages
+	events_app_message_register_inbox_received(inbox_received_callback, NULL);
+	events_app_message_register_inbox_dropped(inbox_dropped_callback, NULL);
+	events_app_message_register_outbox_sent(outbox_sent_callback, NULL);
+	events_app_message_register_outbox_failed(outbox_failed_callback, NULL);
+	#endif
+	
 }
 
 static void deinit() {

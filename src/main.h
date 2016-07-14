@@ -1,6 +1,3 @@
-#include <pebble.h>
-#include "kiezelpay.h"
-
 #define KEY_ANIMATION 0
 #define KEY_DISCONNECT 1
 #define KEY_RECONNECT 2

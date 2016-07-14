@@ -1,5 +1,5 @@
 /*
-* KiezelPay Integration Library - v1.4 - Copyright Kiezel 2016
+* KiezelPay Integration Library - v2.0 - Copyright Kiezel 2016
 *
 * BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO 
 * WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE 
@@ -25,7 +25,7 @@
 */
 
 #pragma once
-#include <pebble.h>
+
 /**
   Set to 1 to enable verbose logging, handy for tracking down issues with the kiezelpay integration
   
@@ -40,7 +40,7 @@
   
   Test purchases only, set to 0 before releasing or users can get your app for free!
 */
-#define KIEZELPAY_TEST_MODE 0
+#define KIEZELPAY_TEST_MODE 1
 
 /**
   Set to 1 to remove all code which has to do with the time based trial. This saves memory and code space in case you don't use it.
@@ -80,12 +80,13 @@
 #define KIEZELPAY_BLUETOOTH_UNAVAILABLE_MSG "There is a problem with the connection between your watch and your phone"
 #define KIEZELPAY_INTERNET_UNAVAILABLE_MSG "There is a problem with the internet connection of your phone"
 /** 
-  You can replace "code" with anything you want in the url, it will all work, e.g.: "kzl.io/myappname". 
-  It is also possible to configure that custom url in your product settings on our website so its shows your personalized purchase page to the customers 
+  It is also possible to configure a custom url in your product settings on our website so its shows your personalized purchase page to the customers.
+  if you do so, remember to also change the URL below so it matches.
 */
-#define KIEZELPAY_CODE_AVAILABLE_MSG "To continue using this product please visit kzl.io/code and enter this code:"
-#define KIEZELPAY_PURCHASE_STARTED_MSG "Please complete the purchase process to unlock this app"
+#define KIEZELPAY_CODE_AVAILABLE_MSG "To continue using NCAA FBS Watchface please visit kzl.io/ncaafbs and enter this code:"
+#define KIEZELPAY_PURCHASE_STARTED_MSG "Please complete the purchase process to unlock NCAA FBS Watchface"
 #define KIEZELPAY_LICENSED_MSG "Thank you for your purchase!"
+
 
 /**
   All events that can be fired by kiezelpay lib.
@@ -96,9 +97,7 @@ typedef enum {
   KIEZELPAY_BLUETOOTH_UNAVAILABLE = 1 << 0,       /**< Cannot send appmessage to phone */
   KIEZELPAY_INTERNET_UNAVAILABLE  = 1 << 1,       /**< Cannot connect with kiezelpay server */
   KIEZELPAY_ERROR                 = 1 << 2,       /**< Generic error (e.g. invalid message format) */
-#if KIEZELPAY_DISABLE_TIME_TRIAL == 0
   KIEZELPAY_TRIAL_STARTED         = 1 << 3,       /**< Trial has started (trial end time [uint32_t] as extra data) ==> unlock all features available during trial */
-#endif
   KIEZELPAY_TRIAL_ENDED           = 1 << 4,       /**< Trial has ended, kiezelpay lib is attempting to initiate the purchase on the server ==> disable all trial features */
   KIEZELPAY_CODE_AVAILABLE        = 1 << 5,       /**< A purchase transaction has been initiated on the kiezelpay server (purchase code [uint32_t] as extra data) */
   KIEZELPAY_PURCHASE_STARTED      = 1 << 6,       /**< The user entered the code on the kiezelpay website and purchase is in progress (purchase code [uint32_t] as extra data) */
@@ -111,46 +110,11 @@ typedef enum {
 */
 typedef bool (*kiezelpay_event_handler)(kiezelpay_event,void*);
 
-/** Handler signature to get notified of inbox received AppMessage events */
-typedef void (*inbox_received_handler)(DictionaryIterator*,void*);
-/** Handler signature to get notified of inbox dropped AppMessage events */
-typedef void (*inbox_dropped_handler)(AppMessageResult,void*);
-/** Handler signature to get notified of outbox failed AppMessage events */
-typedef void (*outbox_failed_handler)(DictionaryIterator*,AppMessageResult,void*);
-/** Handler signature to get notified of outbox sent AppMessage events */
-typedef void (*outbox_sent_handler)(DictionaryIterator*,void*);
-
-
 /**
-  Kiezelpay_config struct used to pass along several settings to the kiezelpay lib.
-  Use the kiezelpay_settings instance for your configuration changes.
+  Optionally set an event handler if you want to handle above events. Set to NULL to unregister.
 */
-typedef struct {
-  /**
-    Override AppMessage inbox and outbox size
-  */
-  uint16_t messaging_inbox_size;
-  uint16_t messaging_outbox_size;
+void kiezelpay_set_event_handler(kiezelpay_event_handler event_cb);
 
-  /**
-    Kiezelpay Event; assign a handler to receive interesting kiezelpay events. You can then choose to act upon them yourself, or let kiezelpay handle it.
-  */
-  kiezelpay_event_handler on_kiezelpay_event;
-  
-  /**
-    AppMessage events; assign to receive incoming AppMessages in your app
-  */
-  inbox_received_handler on_inbox_received;
-  inbox_dropped_handler on_inbox_dropped;
-  outbox_failed_handler on_outbox_failed;
-  outbox_sent_handler on_outbox_sent;
-} kiezelpay_config;
-
-/**
-  KiezelPay settings instance, modify to override default settings.
-*/
-extern kiezelpay_config kiezelpay_settings;
-  
 /** Call once on watchface/app init before using any other functions */
 void kiezelpay_init();
 
@@ -170,13 +134,11 @@ void kiezelpay_start_purchase();
 */
 void kiezelpay_cancel_purchase();
 
-#if KIEZELPAY_DISABLE_TIME_TRIAL == 0
 /**
   Get the time when the current trial will end. You can use this to inform the user how long his trial still lasts.
   This trial end time is also given along with the KIEZELPAY_TRIAL_STARTED event
 */
 time_t kiezelpay_get_trial_end_time();
-#endif
 
 /**
   Get user status info ==> this info is also communicated with the on_kiezelpay_event handler, you can use these to get the status at any other time as well.
@@ -190,3 +152,109 @@ time_t kiezelpay_get_trial_end_time();
 */
 int32_t kiezelpay_get_status();
 
+
+
+/***************************************************/
+/* KIEZELPAY GENERATED CODE BELOW - DO NOT MODIFY! */
+/***************************************************/
+
+
+#define KP_GENERATED_MAJOR 2
+
+#define KIEZELPAY_APPID 519012200
+
+
+static uint8_t kiezelpay_secret[16] = {132, 238, 139, 79, 145, 45, 121, 82, 147, 156, 255, 180, 170, 46, 201, 113};
+
+#include <kiezelpay-core/kiezelpay-core.h>
+
+static bool kiezelpay_validate_msg(kiezelpay_msg_data *msg) {
+	LOG("%s", __func__);
+	//before checking the hash, do some sanity checks
+	bool valid_format = (msg != NULL && msg->checksum != NULL);
+
+	if (!valid_format) {
+		return false;
+	}
+	//prepare sha-256 context
+	SHA256_CTX ctx_msg_check;
+	sha256_init(&ctx_msg_check);
+	uint32_t int_for_bytes;
+	sha256_update(&ctx_msg_check, (uint8_t*)&kiezelpay_msg_random + 1, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 7, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 4, 1);
+	sha256_update(&ctx_msg_check, (uint8_t*)&kiezelpay_msg_random + 0, 1);
+	sha256_update(&ctx_msg_check, (uint8_t*)&(kiezelpay_current_state.device_id) + 1, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 8, 1);
+	if (msg->status == 0) {          //unlicensed
+	int_for_bytes = msg->purchase_code;
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes + 3, 1);
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes + 2, 1);
+	}
+	int_for_bytes = kiezelpay_get_status_flags();
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes + 3, 1);
+	int_for_bytes = msg->status;
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 12, 1);
+	#if KIEZELPAY_DISABLE_TIME_TRIAL == 0
+	if (msg->status == 1) {      //trial
+	sha256_update(&ctx_msg_check, (uint8_t*)&(msg->trial_duration) + 2, 1);
+	sha256_update(&ctx_msg_check, (uint8_t*)&(msg->trial_duration) + 1, 1);
+	}
+	#endif
+	if (msg->status == 0) {          //unlicensed
+	int_for_bytes = msg->purchase_code;
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes + 1, 1);
+	}
+	#if KIEZELPAY_DISABLE_TIME_TRIAL == 0
+	if (msg->status == 1) {      //trial
+	sha256_update(&ctx_msg_check, (uint8_t*)&(msg->trial_duration) + 3, 1);
+	}
+	#endif
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 14, 1);
+	int_for_bytes = kiezelpay_get_status_flags();
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes + 2, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 10, 1);
+	sha256_update(&ctx_msg_check, (uint8_t*)&(kiezelpay_current_state.device_id) + 0, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 11, 1);
+	sha256_update(&ctx_msg_check, (uint8_t*)&(kiezelpay_current_state.device_id) + 2, 1);
+	#if KIEZELPAY_DISABLE_TIME_TRIAL == 0
+	if (msg->status == 1) {      //trial
+	sha256_update(&ctx_msg_check, (uint8_t*)&(msg->trial_duration) + 0, 1);
+	}
+	#endif
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 5, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 0, 1);
+	if (msg->status == 1 || msg->status == 2) {      //trial or licensed
+	sha256_update(&ctx_msg_check, (uint8_t*)&(msg->validity_period), 1);
+	}
+	int_for_bytes = kiezelpay_get_status_flags();
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes + 1, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 2, 1);
+	sha256_update(&ctx_msg_check, (uint8_t*)&(kiezelpay_current_state.device_id) + 3, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 3, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 1, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 13, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 15, 1);
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 6, 1);
+	if (msg->status == 0) {          //unlicensed
+	int_for_bytes = msg->purchase_code;
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes + 0, 1);
+	}
+	sha256_update(&ctx_msg_check, kiezelpay_secret + 9, 1);
+	int_for_bytes = kiezelpay_get_status_flags();
+	sha256_update(&ctx_msg_check, (uint8_t*)&int_for_bytes + 0, 1);
+	//calculate sha-256 hash
+	uint8_t hash[SHA256_BLOCK_SIZE];
+	sha256_final(&ctx_msg_check, hash);
+
+	//compare this hash with the checksum returned by the server
+	for (uint32_t i = 0; i < SHA256_BLOCK_SIZE; i++) {
+		if (msg->checksum[i] != hash[i]) return false;
+	}
+	return true;
+}
+
+void kiezelpay_init() {
+  kiezelpay_internal_init(KIEZELPAY_APPID, kiezelpay_secret, kiezelpay_validate_msg);
+}
