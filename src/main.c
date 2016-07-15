@@ -1070,15 +1070,14 @@ void setbadTeam(int x){
 	}
 }
 
-//Process the data coming from the configruable
-void process_tuple(Tuple *t){	
-  int key = t->key;
-  int value = t->value->int32;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Got key %d, value %d", key, value);
-	//Switch from set value to set value from configruable
-  switch(key){
-		//Animations 0 on, 1 off, 2 auto
-		case KEY_ANIMATION:
+//Look through all of the configurable data
+void inbox(DictionaryIterator *iter, void *context){
+	Layer *window_layer = window_get_root_layer(s_window);
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "Reading Config");
+	// Read animation data
+	Tuple *animation_t = dict_find(iter, MESSAGE_KEY_ANIMATION);
+	if(animation_t){
+		int value = animation_t->value->int32;
 		if(value == 0){
 			persist_write_int(PER_ANIMATION, 1);
 			persist_write_bool(PER_AUTOANIMATION, false);
@@ -1097,85 +1096,70 @@ void process_tuple(Tuple *t){
 			runAnimation = 1;
 			autoAni = true;
 		}
-		break;
-		//Auto Animation range
-		case KEY_AUTORANGE:
-		autoRange = value;
-		persist_write_int(PER_AUTORANGE, value);
-		break;
-		//Bluetooth disconnect vibrations
-		case KEY_DISCONNECT:
-		if(value == 0){
-			persist_write_int(PER_DISCONNECT, 0);
-			discon = 0;
-		}
-		else if(value == 1){
-			persist_write_int(PER_DISCONNECT, 1);
-			discon = 1;
-		}
-		else if(value == 2){
-			persist_write_int(PER_DISCONNECT, 2);
-			discon = 2;
-		}
-		else if(value == 3){
-			persist_write_int(PER_DISCONNECT, 3);
-			discon = 3;
-		}
-		break;
-		//Bluetooth reconnect vibrations
-		case KEY_RECONNECT:
-		if(value == 0){
-			persist_write_int(PER_RECONNECT, 0);
-			recon = 0;
-		}
-		else if(value == 1){
-			persist_write_int(PER_RECONNECT, 1);
-			recon = 1;
-		}
-		else if(value == 2){
-			persist_write_int(PER_RECONNECT, 2);
-			recon = 2;
-		}
-		else if(value == 3){
-			persist_write_int(PER_RECONNECT, 3);
-			recon = 3;
-		}
-		break;
-		//Check version
-		case KEY_VERSION:
-		if(value != version && !outdated){
-			
-			#ifdef PBL_COLOR
-				s_res_update = gbitmap_create_with_resource(RESOURCE_ID_update);
-			#else
-				
-			#endif
-			APP_LOG(APP_LOG_LEVEL_DEBUG, "Outdated");
-			outdated = true;
-			bitmap_layer_set_bitmap(logo, s_res_update);
-			layer_mark_dirty(bitmap_layer_get_layer(logo));
-		}
-		break;
-		case KEY_TEAM:
-		team = value;
+	}
+	Tuple *autoani_t = dict_find(iter, MESSAGE_KEY_AUTORANGE);
+	if(autoani_t){
+		autoRange = autoani_t->value->int32;
+		persist_write_int(PER_AUTORANGE, autoRange);
+	}
+	Tuple *quiet_t = dict_find(iter, MESSAGE_KEY_QUIET);
+  if(quiet_t) {
+    quiet = quiet_t->value->int32 == 1;
+		persist_write_bool(PER_QUIET, quiet);
+  }
+	Tuple *qstart_t = dict_find(iter, MESSAGE_KEY_AUTORANGE);
+	if(qstart_t){
+		int qstart = qstart_t->value->int32;
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "QSTART: %d", qstart);
+		//persist_write_int(PER_AUTORANGE, autoRange);
+	}
+	Tuple *qend_t = dict_find(iter, MESSAGE_KEY_AUTORANGE);
+	if(qend_t){
+		int qend = qend_t->value->int32;
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "QEND: %d", qend);
+		//persist_write_int(PER_AUTORANGE, autoRange);
+	}
+	
+	// Read Bluetooth data
+	Tuple *disconnect_t = dict_find(iter, MESSAGE_KEY_DISCONNECT);
+  if(disconnect_t) {
+    discon = disconnect_t->value->int32 == 1;
+		persist_write_int(PER_DISCONNECT, discon);
+	}
+	Tuple *reconnect_t = dict_find(iter, MESSAGE_KEY_RECONNECT);
+	if(reconnect_t) {
+		recon = reconnect_t->value->int32 == 1;
+		persist_write_int(PER_RECONNECT, recon);
+	}
+	
+	// Read Display data
+	Tuple *window_t = dict_find(iter, MESSAGE_KEY_WINDOW);
+	if(window_t){
+		mainWindow = window_t->value->int32;
+		persist_write_int(PER_WINDOW, mainWindow);
+	}
+	Tuple *team_t = dict_find(iter, MESSAGE_KEY_TEAM);
+	if(team_t){
+		team = team_t->value->int32;
 		if(team == 143){
 			premium = true;
 		}
 		persist_write_int(PER_TEAM, team);
-		break;
-		case KEY_BADTEAM:
-		badteam = value;
-		if(team == 143){
+	}
+	Tuple *badteam_t = dict_find(iter, MESSAGE_KEY_BADTEAM);
+	if(badteam_t){
+		badteam = badteam_t->value->int32;
+		if(badteam == 143){
 			premium = true;
 		}
 		persist_write_int(PER_BADTEAM, badteam);
-		break;
-		case KEY_WINDOW:
-		mainWindow = value;
-		persist_write_int(PER_WINDOW, mainWindow);
-		break;
-		case KEY_COUNTDOWN:
-		if(value == 0){
+	}
+
+	// Read Countdown data
+	Tuple *countdown_t = dict_find(iter, MESSAGE_KEY_COUNTDOWN);
+	if(countdown_t) {
+		bool value = countdown_t->value->int32 == 1;
+		if(!value){
 			countdown = 4;
 			persist_write_int(PER_COUNTDOWN, 4);
 			text_layer_set_text(s_count1_layer, "     ");
@@ -1192,12 +1176,27 @@ void process_tuple(Tuple *t){
 				persist_write_int(PER_COUNTDOWN, 0);
 			}
 		}
-		break;
-		case KEY_COUNTDOWNDEFAULT:
-		countdownDEFAULT = value;
+	}
+	Tuple *countdowndefault_t = dict_find(iter, MESSAGE_KEY_COUNTDOWNDEFAULT);
+	if(countdowndefault_t){
+		countdownDEFAULT = countdowndefault_t->value->int32;
 		persist_write_int(PER_COUNTDOWNDEFAULT, countdownDEFAULT);
-		break;
-		case KEY_COUNTDOWNANI:
+	}
+	Tuple *gametime_t = dict_find(iter, MESSAGE_KEY_GAMETIME);
+	if(gametime_t){
+		gametime = gametime_t->value->int32;
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "GAMETIME: %d", gametime);
+		persist_write_int(PER_GAMETIME, gametime);
+	}
+	Tuple *gameday_t = dict_find(iter, MESSAGE_KEY_GAMEDAY);
+	if(gameday_t){
+		gameday = gameday_t->value->int32;
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "GAMETIME: %d", gameday);
+		persist_write_int(PER_GAMEDAY, gameday);
+	}
+	Tuple *countdownani_t = dict_find(iter, MESSAGE_KEY_COUNTDOWNANI);
+	if(countdownani_t) {
+		int value = window_t->value->int32;
 		if(value == 0){
 			countdownAni = 0;
 			persist_write_int(PER_COUNTDOWNANI, 0);
@@ -1220,72 +1219,13 @@ void process_tuple(Tuple *t){
 			}
 			persist_write_int(PER_COUNTDOWNANI, 2);
 		}
-		break;
-		case KEY_GAMEDAY:
-		gameday = value;
-		persist_write_int(PER_GAMEDAY, gameday);
-		break;
-		case KEY_DELAY:
-		delay = value;
-		persist_write_int(PER_DELAY, delay);
-		break;
-		case KEY_GAMETIME:
-		gametime = value;
-		persist_write_int(PER_GAMETIME, gametime);
-		break;
-		case KEY_GAMEMIN:
-		gamemin = value;
-		persist_write_int(PER_GAMEMIN, gamemin);
-		break;
-		case KEY_GAMEMONTH:
-		gamemonth = value;
-		persist_write_int(PER_GAMEMONTH, gamemonth);
-		break;
-		case KEY_GAMEAPM:
-		gameapm = value;
-		persist_write_int(PER_GAMEAPM, gameapm);
-		break;
-		case KEY_GAMEYEAR:
-		gameyear = value;
-		persist_write_int(PER_GAMEYEAR, gameyear);
-		break;
-		case KEY_QUIET:
-		if(value == 0){
-			quiet = true;
-			persist_write_bool(PER_QUIET, true);
-		}
-		else{
-			quiet = false;
-			persist_write_bool(PER_QUIET, false);
-		}
-		break;
-		case KEY_STHR:
-		sthr = value;
-		persist_write_int(PER_STHR, value);
-		break;
-		case KEY_STMIN:
-		stmin = value;
-		persist_write_int(PER_STMIN, value);
-		break;
-		case KEY_STAMPM:
-		stampm = value;
-		persist_write_int(PER_STAMPM, value);
-		break;
-		case KEY_EDHR:
-		edhr = value;
-		persist_write_int(PER_EDHR, value);
-		break;
-		case KEY_EDMIN:
-		edmin = value;
-		persist_write_int(PER_EDMIN, value);
-		break;
-		case KEY_EDAMPM:
-		edampm = value;
-		persist_write_int(PER_EDAMPM, value);
-		break;
-		//Health stuff
-		case KEY_STEPS:
-		if(value == 0){
+	}
+	
+	// Read Health data
+	Tuple *steps_t = dict_find(iter, MESSAGE_KEY_STEPS);
+  if(steps_t) {
+    bool value = steps_t->value->int32 == 1;
+		if(!value){
 			persist_write_bool(PER_STEPS, false);
 			healthS = false;
 			if(healthSHistory){
@@ -1293,7 +1233,7 @@ void process_tuple(Tuple *t){
 				healthSHistory = false;
 			}
 		}
-		else if(value == 1){
+		else{
 			persist_write_bool(PER_STEPS, true);
 			healthS = true;
 			premium = true;
@@ -1302,9 +1242,11 @@ void process_tuple(Tuple *t){
 				healthSHistory = true;
 			}
 		}
-		break;
-		case KEY_TD:
-		if(value == 0){
+  }
+	Tuple *td_t = dict_find(iter, MESSAGE_KEY_TD);
+  if(td_t) {
+    bool value = td_t->value->int32 == 1;
+		if(!value){
 			persist_write_bool(PER_TD, false);
 			healthTD = false;
 			if(healthTDHistory){
@@ -1315,7 +1257,7 @@ void process_tuple(Tuple *t){
 				healthTDHistory = false;
 			}
 		}
-		else if(value == 1){
+		else{
 			persist_write_bool(PER_TD, true);
 			healthTD = true;
 			premium = true;
@@ -1325,29 +1267,21 @@ void process_tuple(Tuple *t){
 				healthTDHistory = true;
 			}
 		}
-		break;
+  }
+	
+	//Read Developer data
+	Tuple *version_t = dict_find(iter, MESSAGE_KEY_VERSION);
+	if(version_t){
+		int value = version_t->value->int32;
+		if(value != version && !outdated){
+			s_res_update = gbitmap_create_with_resource(RESOURCE_ID_update);
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "Outdated");
+			outdated = true;
+			bitmap_layer_set_bitmap(logo, s_res_update);
+			layer_mark_dirty(bitmap_layer_get_layer(logo));
+		}
 	}
 	
-}
-
-//Look through all of the configurable data
-void inbox(DictionaryIterator *iter, void *context){
-	Layer *window_layer = window_get_root_layer(s_window);
-	Tuple *t = dict_read_first(iter);
-	if(t == NULL){
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "FLOP");
-	}
-  if(t){
-		APP_LOG(APP_LOG_LEVEL_INFO, "Processing");
-    process_tuple(t);
-  }
-  while(t != NULL){
-		APP_LOG(APP_LOG_LEVEL_INFO, "Looking");
-    t = dict_read_next(iter);
-    if(t){
-      process_tuple(t);
-    }
-  }
 	
 	if(premium == true){
 		#ifdef PBL_PLATFORM_APLITE
@@ -1452,10 +1386,8 @@ void inbox(DictionaryIterator *iter, void *context){
 		#endif
 		text_layer_set_text(s_beat_layer, "BEAT");
 	}
-
 	
 	update_time();
-	
 }
 
 static void main_window_load(Window *window) {
@@ -1806,7 +1738,7 @@ static void init() {
 	
 	// Subscribe to js data
 	app_message_register_inbox_received(inbox);
-  app_message_open(200, 32);//app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  app_message_open(128, 128);//app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 	
 	#ifdef PBL_PLATFORM_APLITE
 	#else

@@ -36,51 +36,9 @@ var kiezelpay = new KiezelPay(KIEZELPAY_LOGGING);
 
 /* Add your own js code below */
 
-Pebble.addEventListener("ready",
-  function(e) {
-    console.log("PebbleKit JS ready!");
-  }
-);
-
-Pebble.addEventListener("showConfiguration",
-  function(e) {
-		var info;
-		if (Pebble.getActiveWatchInfo) {
-			// Available.
-			info = Pebble.getActiveWatchInfo();
-
-			console.log('Pebble model: ' + info.platform);
-		} 
-		else {
-			// Gracefully handle no info available
-		}
-		if(info.platform == 'aplite'){
-			//Load config page for OG Pebble
-			Pebble.openURL("http://kflinderman.github.io/NCAA/index3");
-		}
-		else{
-			/*if(kiezelpay_current_state.licensed){
-				//Load the remote config page
-				Pebble.openURL("http://kflinderman.github.io/NCAA/index4");
-			}
-			else{*/
-				//Load the remote config page
-				Pebble.openURL("http://kflinderman.github.io/NCAA/index2");
-			//}
-		}
-  }
-);
-
-Pebble.addEventListener("webviewclosed", function(e){
-	console.log("Configuration closed");
-	console.log("Response = " + e.response.length + "   " + e.response);
-	if (e.response !== undefined && e.response !== '' && e.response !== 'CANCELLED') {
-		console.log("User hit save");
-		values = JSON.parse(decodeURIComponent(e.response));
-		console.log("stringified options: " + JSON.stringify((values)));
-		Pebble.sendAppMessage(
-			values
-		);
-		console.log("Sending...");
-	}
-});
+// Import the Clay package
+var Clay = require('pebble-clay');
+// Load our Clay configuration file
+var clayConfig = require('./config');
+// Initialize Clay
+var clay = new Clay(clayConfig);
