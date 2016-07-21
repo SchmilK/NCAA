@@ -1,5 +1,5 @@
 /*
-* KiezelPay Integration Library - v2.0 - Copyright Kiezel 2016
+* KiezelPay Integration Library - v2.0.5 - Copyright Kiezel 2016
 *
 * BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO 
 * WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE 
@@ -31,7 +31,7 @@
   
   Set to 0 before releasing
 */
-#define KIEZELPAY_LOG_VERBOSE 1
+#define KIEZELPAY_LOG_VERBOSE 0
 
 /**
   When set to 1, you can test the purchasing of your app without having to pay for real.
@@ -40,7 +40,7 @@
   
   Test purchases only, set to 0 before releasing or users can get your app for free!
 */
-#define KIEZELPAY_TEST_MODE 1
+#define KIEZELPAY_TEST_MODE 0
 
 /**
   Set to 1 to remove all code which has to do with the time based trial. This saves memory and code space in case you don't use it.
@@ -151,6 +151,35 @@ time_t kiezelpay_get_trial_end_time();
   Keep this in mind when showing messages to the user based on the result of this function.
 */
 int32_t kiezelpay_get_status();
+
+#if KIEZELPAY_DISABLE_MESSAGES == 0
+#define KIEZELPAY_BBM_DEFINED
+/**
+  The function below allows you to define how KiezelPay will handle the watch back button 
+  when the KiezelPay purchase is in progress and the KiezelPay purchase dialog is visible.
+  
+  This will not affect the normal function of the back button in any way when the purchase
+  dialog is not visible.
+  
+  These settings do not affect how the back button is handled in watchfaces, only in watchapps.
+  
+  WARNINGS: 
+    - "KIEZELPAY_BACK_BTN_DEFAULT" will allow the user to close the purchase dialog
+      in a watchapp (not in a watchface) which then allows the user to use the app without
+      paying if you do not add extra checks for this scenario.
+    - "KIEZELPAY_BACK_BTN_DISABLE" will lock the user in the purchase dialog unable
+      to get out of your app in case of a watchapp (not in a watchface). This is a very
+      bad user experience and will make your app look like ransomware!
+*/
+typedef enum {
+  KIEZELPAY_BACK_BTN_DEFAULT,    /**< Leave default behaviour */
+  KIEZELPAY_BACK_BTN_DISABLE,    /**< Disable the back button */
+  KIEZELPAY_BACK_BTN_EXIT        /**< Exit the app or watchface (default setting) */
+} kiezelpay_back_button_mode;
+
+void kiezelpay_set_back_button_mode(kiezelpay_back_button_mode mode);
+#endif
+
 
 
 

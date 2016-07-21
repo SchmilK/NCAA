@@ -26,7 +26,7 @@
 
 
 /* === KIEZELPAY === SET TO false BEFORE RELEASING === */
-var KIEZELPAY_LOGGING = true;
+var KIEZELPAY_LOGGING = false;
 /* === KIEZELPAY === SET TO false BEFORE RELEASING === */
 
 /* initiate KiezelPay functionality */
@@ -42,3 +42,17 @@ var Clay = require('pebble-clay');
 var clayConfig = require('./config');
 // Initialize Clay
 var clay = new Clay(clayConfig);
+
+/*
+Pebble.addEventListener('webviewclosed', function(e) {
+// Get the keys and values from each config item
+  var claySettings = clay.getSettings(e.response, false);
+  var claySettingsRaw = clay.getSettings(e.response, true);
+	console.log("Configuration closed");
+	console.log("Response = " + e.response.length + "   " + e.response);
+	claySettings = JSON.parse(decodeURIComponent(e.response));
+	console.log("Stringified options: " + JSON.stringify((claySettings)));
+	//console.log("Raw Stringified options: " + JSON.stringify((claySettingsRaw)));
+
+});
+*/
